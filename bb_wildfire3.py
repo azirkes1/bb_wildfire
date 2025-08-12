@@ -954,7 +954,7 @@ with st.container():
             present = set(np.unique(band)) 
 
             #create legend and locator
-            legend_img = build_legend_image(cmap, labels, present, map_img.height)
+            legend_img = build_legend_image(cmap, labels, present, map_img.height, layer_name)
             locator_img = create_locator_map(roi)
 
             #trim whitespace
