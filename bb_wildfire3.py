@@ -34,6 +34,7 @@ import streamlit as st
 import requests
 import geopandas as gpd
 from folium.plugins import MarkerCluster
+from scipy.ndimage import generic_filter
 # ---------------------------------------------------------
 #  authorize Google Earth Engine 
 # ---------------------------------------------------------
