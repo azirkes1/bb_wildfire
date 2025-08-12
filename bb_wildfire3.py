@@ -890,7 +890,7 @@ with st.container():
             # ---------------------------------------------------------
             #  create main pdf map 
             # ---------------------------------------------------------
-           with MemoryFile(io.BytesIO(tif_bytes)) as mem:
+            with MemoryFile(io.BytesIO(tif_bytes)) as mem:
                 with mem.open() as src:
                 
                     # --- create main map ---
