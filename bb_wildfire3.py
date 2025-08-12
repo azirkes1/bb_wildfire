@@ -840,6 +840,7 @@ with st.container():
                 nodata_values = [-2147483648, 0, -9999]
                 valid_data_mask = ~np.isin(dst_array, nodata_values)
                 rgb = np.ones((dst_array.shape[0], dst_array.shape[1], 3), dtype=np.uint8) * 255
+                cmap = layer_recipe["colors"]
                 for k, color in cmap.items():
                     class_pixels = valid_data_mask & (dst_array == k)
                     rgb[class_pixels] = color
