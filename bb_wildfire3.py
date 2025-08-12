@@ -770,124 +770,181 @@ with st.container():
             
        
 
-    
         # ---------------------------------------------------------
         #  back to main img function - extracting TIF data
         # ---------------------------------------------------------
         
-        layer_recipe = recipe[layer_name]
-        classified_img = ee.Image(layer_recipe["ee_image"]).toInt()
+        #extract just the selected layer's recipe
+        layer_recipe = recipe[layer_name] 
+       
+        #create metadata text file 
+        txt_bytes = generate_text_metadata_file(recipe, layer_name) 
 
-        # Get the native projection info from the EE image
-        native_proj = classified_img.projection().getInfo()
-        native_crs = native_proj['crs']           # e.g. 'EPSG:32612'
-        native_transform = native_proj['transform']  # [scaleX, shearX, translateX, shearY, scaleY, translateY]
+        #get image to google earth engine and cast to int
+        img_ee = layer_recipe["ee_image"].clip(roi).unmask(0).toInt()
 
-        # Create hard pixel mask clipped to ROI in native projection
-        pixel_mask = ee.Image.constant(1).toInt().clip(roi).reproject(classified_img.projection())
-
-        img_ee = classified_img.updateMask(pixel_mask) \
-            .unmask(-9999) \
-            .setDefaultProjection(native_crs, None, abs(native_transform[0]))
-        
-        # Generate download URL WITHOUT reprojection (no 'crs' parameter)
-        pixel_size = abs(native_proj['transform'][0])
+        #generate download URL with nearest resampling
         tiff_url = img_ee.getDownloadURL({
-            'scale': pixel_size,
+            'scale': 30,
+            'crs': 'EPSG:3338',
             'region': roi.getInfo()['coordinates'],
-            'filePerBand': False
+            'filePerBand': False,
+            'formatOptions': {
+                'resampling': 'nearest'
+            }
         })
-
-        # Download and extract the original TIFF (in native CRS)
+            
+        #sends HTTP GET request and returns ZIP file
         response = requests.get(tiff_url)
+
+        #reads the ZIP file and extract the tif file
         zip_bytes = response.content
         original_tif = extract_tif_from_zip(zip_bytes)
 
-        # Open the original TIFF with rasterio
-        with MemoryFile(io.BytesIO(original_tif)) as mem:
+        #pull colors and labels from layer recipe 
+        cmap = layer_recipe["colors"]
+        labels = layer_recipe["labels"]
+
+        #get aspect ratio 
+        aspect = get_aspect_ratio(roi)
+        
+        #get layout type based on aspect ratio 
+        if aspect > 3:
+            layout = "horizontal"  #wide → legend/locator below
+        elif aspect < 1.5:
+            layout = "vertical"  #tall → legend/locator right
+        else:
+            layout = "square"  #square → default
+
+        # ---------------------------------------------------------
+        #  reproject tif 
+        # ---------------------------------------------------------
+        
+        #wraps tif_bytes into in-memory file
+        with MemoryFile(io.BytesIO(original_tif)) as mem: 
+            #opens tif file and reads it 
             with mem.open() as src:
-                # Prepare destination metadata for reprojection to EPSG:3338 with scale 30
-                dst_crs = 'EPSG:3338'
-                dst_transform, dst_width, dst_height = calculate_default_transform(
-                    src.crs, dst_crs, src.width, src.height, *src.bounds, resolution=30)
-                
-                dst_profile = src.profile.copy()
-                dst_profile.update({
+                band_data = src.read(1)
+                width = src.width
+                height = src.height
+                dtype = src.dtypes[0]
+                count = src.count
+                profile = src.profile.copy()
+
+                #gets bounding box from geometry 
+                lonlat_coords = geometry['coordinates'][0]
+                lons, lats = zip(*lonlat_coords)
+                xmin, xmax = min(lons), max(lons)
+                ymin, ymax = min(lats), max(lats)
+
+                #reprojects bounding box from EPSG:4326 to to EPSG:3338 and 
+                transformer = Transformer.from_crs("EPSG:4326", "EPSG:3338", always_xy=True)
+                x0, y0 = transformer.transform(xmin, ymin)
+                x1, y1 = transformer.transform(xmax, ymax)
+
+                #define raster transform and crs
+                dst_crs = CRS.from_epsg(3338)
+                transform, width, height = calculate_default_transform(
+                    src.crs, dst_crs, src.width, src.height, *src.bounds
+                )
+
+            #update the profile with CRS and transform
+                profile.update({
+                    'driver': 'GTiff',
+                    'height': height,
+                    'width': width,
+                    'count': count,
+                    'dtype': dtype,
                     'crs': dst_crs,
-                    'transform': dst_transform,
-                    'width': dst_width,
-                    'height': dst_height,
-                    'nodata': -9999,
+                    'transform': transform,
                 })
 
-                # Prepare destination array
-                dst_array = np.empty((dst_height, dst_width), dtype=src.dtypes[0])
+                #create empty base file
+                destination = np.empty((height, width), dtype=src.dtypes[0])
 
-                # Reproject once using nearest neighbor resampling
+                #reproject
                 reproject(
-                    source=rasterio.band(src, 1),
-                    destination=dst_array,
+                    source=src.read(1),
+                    destination=destination,
                     src_transform=src.transform,
                     src_crs=src.crs,
-                    dst_transform=dst_transform,
+                    dst_transform=transform,
                     dst_crs=dst_crs,
-                    resampling=Resampling.nearest,
-                    dst_nodata=-9999
+                    resampling=Resampling.nearest
                 )
 
-                # Now use dst_array as your classified band for coloring, plotting, etc.
-                # Convert to RGB with white background and apply colors
-                nodata_values = [-2147483648, 0, -9999]
-                valid_data_mask = ~np.isin(dst_array, nodata_values)
-                rgb = np.ones((dst_array.shape[0], dst_array.shape[1], 3), dtype=np.uint8) * 255
-                cmap = layer_recipe["colors"]
-                for k, color in cmap.items():
-                    class_pixels = valid_data_mask & (dst_array == k)
-                    rgb[class_pixels] = color
+                # Write the new raster
+                fixed_memfile = MemoryFile()
+                with fixed_memfile.open(**profile) as dst:
+                    dst.write(band_data, 1)
 
-                # Extent from dst_transform for plotting
-                xmin = dst_transform[2]
-                ymax = dst_transform[5]
-                xmax = xmin + dst_transform[0] * dst_width
-                ymin = ymax + dst_transform[4] * dst_height
-                extent = [xmin, xmax, ymin, ymax]
+                tif_bytes = fixed_memfile.read()
 
-                proj = ccrs.epsg(3338)
+            # ---------------------------------------------------------
+            #  create main pdf map 
+            # ---------------------------------------------------------
+            with MemoryFile(io.BytesIO(tif_bytes)) as mem:
+                with mem.open() as src:
+                
+                    #read the band and create a mask for nodata values
+                    band = src.read(1)
+                    nodata = src.nodata or 0
+                    masked_band = np.ma.masked_equal(band, nodata) #create mask that excludes nodata
 
-                # Layout logic remains the same
-                if layout == "vertical":
-                    fig_size = (8, 11)
-                elif layout == "horizontal":
-                    fig_size = (11, 8)
-                else:
-                    fig_size = (10, 10)
+                    #convert raster to RGB image 
+                    rgb = np.ones((masked_band.shape[0], masked_band.shape[1], 3), dtype=np.uint8) * 255
+                    for k, color in cmap.items():
+                        rgb[masked_band == k] = color
 
-                fig, ax = plt.subplots(figsize=fig_size, subplot_kw={'projection': proj})
-                ax.imshow(rgb, origin='upper', extent=extent)
-                ax.set_extent(extent, crs=proj)
-                ax.set_title(f"{layer_name} Map", fontsize=18)
-                ax.set_aspect('equal')
+                    #set projection and extent 
+                    proj = ccrs.epsg(3338)
+                    extent = [x0, x1, y0, y1]
 
-                gl = ax.gridlines(
-                    crs=ccrs.PlateCarree(),
-                    draw_labels=True,
-                    linewidth=0.8,
-                    color='gray',
-                    alpha=0.7,
-                    linestyle='--'
-                )
-                gl.top_labels = False
-                gl.right_labels = False
-                gl.xlabel_style = {'size': 10}
-                gl.ylabel_style = {'size': 10}
+                    #set figure size based on layout 
+                    if layout == "vertical":
+                        fig_size = (8, 11)
+                    elif layout == "horizontal":
+                        fig_size = (11, 8)
+                    else:
+                        fig_size = (10, 10)
 
-                add_scalebar_from_ax_extent(ax)
+                    #plot the image
+                    fig, ax = plt.subplots(figsize=fig_size, subplot_kw={'projection': proj}) #create figure
+                    ax.imshow(rgb, origin='upper', extent=extent) #render image
+                    ax.set_extent(extent, crs=proj) #set axis extent 
+                    ax.set_title(f"{layer_name} Map", fontsize=18) #create title 
+                    ax.set_aspect('equal')
 
-                buf = io.BytesIO()
-                plt.savefig(buf, format='png', bbox_inches='tight', dpi=150)
-                plt.close(fig)
-                buf.seek(0)
-                map_img = Image.open(buf)
+                    #add lat/lon gridlines in degrees
+                    gl = ax.gridlines(
+                        crs=ccrs.PlateCarree(),
+                        draw_labels=True,
+                        linewidth=0.8,
+                        color='gray',
+                        alpha=0.7,
+                        linestyle='--'
+                    )
+
+                    #hide labels on top right
+                    gl.top_labels = False 
+                    gl.right_labels = False 
+
+                    #set font size for x and y axis labels
+                    gl.xlabel_style = {'size': 10}
+                    gl.ylabel_style = {'size': 10}
+
+                    #estimate image width in pixels
+                    width = src.width
+                    height = src.height
+
+                    add_scalebar_from_ax_extent(ax)
+                                        
+                    #saves figure as PNG in memory and loads it as a PIL image
+                    buf = io.BytesIO()
+                    plt.savefig(buf, format='png', bbox_inches='tight', dpi=150)
+                    plt.close(fig)
+                    buf.seek(0)
+                    map_img = Image.open(buf)
                             
             # ---------------------------------------------------------
             #  build legend and locator map
