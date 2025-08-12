@@ -62,124 +62,109 @@ ee.Initialize(credentials)
 #everything resides in this container, helps to reduce padding
 with st.container():
 
-    st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
-    
-    st.markdown("""
+    mobile_detection = """
+        <script>
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
+
+        if (isMobile()) {
+            document.body.classList.add('mobile-device');
+        } else {
+            document.body.classList.add('desktop-device');
+        }
+        </script>
+        """
+
+        # Updated CSS with mobile detection
+        st.markdown(mobile_detection, unsafe_allow_html=True)
+
+        st.markdown("""
         <style>
-        /* Reduce top and bottom padding in main layout */
+        /* Hide mobile content on desktop */
+        .desktop-device .mobile-only {
+            display: none !important;
+        }
+
+        /* Hide sidebar on mobile, show mobile content */
+        .mobile-device section[data-testid="stSidebar"] {
+            display: none !important;
+        }
+
+        .mobile-device .desktop-only {
+            display: none !important;
+        }
+
+        /* Style mobile content */
+        .mobile-content {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* Your existing styles... */
         .block-container {
             padding-top: 0.5rem !important;
             padding-bottom: 0.5rem !important;
         }
 
-        /* Reduce space under folium map */
-        .element-container:has(.folium-map),
-        iframe {
-            margin-bottom: 0px !important;
-        }
-
-        /* Control folium map height */
-        .folium-map {
-            height: 500px !important;
-            overflow: hidden !important;
-        }
-
-        /* Hide Streamlit branding/footer */
-        footer, header, .stDeployButton {
-            display: none !important;
-        }
-
-        /* Desktop sidebar styling */
-        @media (min-width: 769px) {
-            section[data-testid="stSidebar"] {
-                overflow: hidden !important;
-                max-height: none !important;
-                width: 350px !important;
-            }
-            
-            section[data-testid="stSidebar"] > div {
-                overflow: hidden !important;
-            }
-        }
-
-        /* Mobile sidebar styling - appear above main content */
-        @media (max-width: 768px) {
-            /* Force the entire sidebar container to be visible */
-            div[data-testid="stSidebar"] {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                position: static !important;
-                transform: translateX(0) !important;
-                width: 100% !important;
-                height: auto !important;
-                background-color: #f8f9fa !important;
-                border: 1px solid #e9ecef !important;
-                border-radius: 8px !important;
-                margin: 10px 0 20px 0 !important;
-                padding: 15px !important;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-            }
-            
-            /* Target the sidebar content wrapper */
-            div[data-testid="stSidebar"] > div {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                overflow: visible !important;
-                height: auto !important;
-                width: 100% !important;
-            }
-            
-            /* Force all sidebar children to be visible */
-            div[data-testid="stSidebar"] * {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-            }
-            
-            /* Hide the mobile sidebar toggle button if it exists */
-            button[kind="header"] {
-                display: none !important;
-            }
-            
-            /* Ensure main content comes after sidebar */
-            .main {
-                order: 2 !important;
-            }
-            
-            /* Make the entire app container flex */
-            .stApp {
-                display: flex !important;
-                flex-direction: column !important;
-            }
-        }
-
-        /* Force iframe height and remove default margin */
-        iframe {
-            height: 500px !important;
-            display: block;
-            margin: 0 auto !important;
-            padding: 0 !important;
-            border: none !important;
-        }
-
-        /* Hide extra container spacing */
-        .element-container:has(.folium-map),
-        .block-container,
-        .main {
-            padding-bottom: 0 !important;
-            margin-bottom: 0 !important;
-        }
+        /* ... rest of your existing CSS ... */
         </style>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    # Create title
-    st.markdown(
-        '<h1 style="font-size:28px;">Bristol Bay Wildfire Management Data Tool</h1>',
-        unsafe_allow_html=True
-    )
+        # Mobile-only content (appears at top on mobile)
+        st.markdown('<div class="mobile-only">', unsafe_allow_html=True)
+        st.markdown('<div class="mobile-content">', unsafe_allow_html=True)
 
+        # Mobile version of your sidebar content
+        selected_options_mobile = st.multiselect(
+            "Which data layers would you like to download? (Mobile)",
+            list(recipe.keys()),
+            key="mobile_multiselect_1"
+        )
+
+        st.markdown(
+            """
+            <div style='color: #808080; margin-bottom: 15px;'>
+                <u>Ownership</u> - Bureau of Land Management<br>
+                <u>Land cover</u> - National Land Cover Database<br>
+                <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
+                <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        selected_filetype_mobile = st.multiselect(
+            "What format do you want the data in? (Mobile)",
+            ['.tif', '.pdf'],
+            key="mobile_multiselect_2"
+        )
+
+        st.markdown(
+            """
+            <div style='color: #808080; margin-bottom: 15px;'>
+                PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Regular sidebar (hidden on mobile)
+        with st.sidebar:
+            st.markdown('<div class="desktop-only">', unsafe_allow_html=True)
+            selected_options = st.multiselect(
+                "Which data layers would you like to download?",
+                list(recipe.keys())
+            )
+            
+            # ... your existing sidebar content ...
+            st.markdown('</div>', unsafe_allow_html=True)
     # ---------------------------------------------------------
     #  define metadata - title, ee_image, colors, labels, credits
     # ---------------------------------------------------------
