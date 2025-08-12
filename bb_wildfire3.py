@@ -38,6 +38,8 @@ from folium.plugins import MarkerCluster
 from scipy.ndimage import generic_filter
 from rasterio.enums import Resampling
 from rasterio.warp import calculate_default_transform, reproject
+import streamlit.components.v1 as components
+
 # ---------------------------------------------------------
 #  authorize Google Earth Engine 
 # ---------------------------------------------------------
@@ -60,7 +62,6 @@ ee.Initialize(credentials)
 #everything resides in this container, helps to reduce padding
 with st.container():
 
-    #html page configuration 
     st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
     
     st.markdown("""
@@ -88,17 +89,63 @@ with st.container():
             display: none !important;
         }
 
-        /* Customize sidebar appearance */
-        section[data-testid="stSidebar"] {
-            overflow: hidden !important;
-            max-height: none !important;
-            width: 350px !important;
+        /* Desktop sidebar styling */
+        @media (min-width: 769px) {
+            section[data-testid="stSidebar"] {
+                overflow: hidden !important;
+                max-height: none !important;
+                width: 350px !important;
+            }
+            
+            section[data-testid="stSidebar"] > div {
+                overflow: hidden !important;
+            }
         }
 
-        section[data-testid="stSidebar"] > div {
-            overflow: hidden !important;
+        /* Mobile sidebar styling - appear above main content */
+        @media (max-width: 768px) {
+            /* Reorder the layout so sidebar appears first */
+            .main .block-container {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            
+            /* Force sidebar to be visible and positioned above main content */
+            section[data-testid="stSidebar"] {
+                display: block !important;
+                visibility: visible !important;
+                position: relative !important;
+                width: 100% !important;
+                max-width: none !important;
+                min-width: none !important;
+                transform: none !important;
+                left: 0 !important;
+                order: -1 !important; /* This puts it first in flex order */
+                margin-bottom: 20px !important;
+                background-color: #f0f2f6 !important;
+                padding: 10px !important;
+                border-radius: 5px !important;
+            }
+            
+            /* Ensure sidebar content is visible */
+            section[data-testid="stSidebar"] > div {
+                display: block !important;
+                visibility: visible !important;
+                overflow: visible !important;
+                padding: 0 !important;
+            }
+            
+            /* Main content appears after sidebar */
+            .main .block-container > div:not([data-testid="stSidebar"]) {
+                order: 1 !important;
+            }
+            
+            /* Make sure sidebar button is visible if it exists */
+            button[data-testid="baseButton-headerNoPadding"] {
+                display: block !important;
+            }
         }
-                
+
         /* Force iframe height and remove default margin */
         iframe {
             height: 500px !important;
@@ -117,6 +164,12 @@ with st.container():
         }
         </style>
     """, unsafe_allow_html=True)
+
+    # Create title
+    st.markdown(
+        '<h1 style="font-size:28px;">Bristol Bay Wildfire Management Data Tool</h1>',
+        unsafe_allow_html=True
+    )
 
     #create title
     st.markdown(
