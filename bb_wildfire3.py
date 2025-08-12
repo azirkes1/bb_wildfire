@@ -263,7 +263,10 @@ with st.container():
             white-space: normal;
             word-wrap: break-word;
             margin-bottom: 15px;'>
-                More information about each layer can be viewed here ----
+                Ownership - 
+                Land cover - 
+                Wildfire Jurisdiction - 
+                Flammability Hazard - 
 
             </div>
             """,
