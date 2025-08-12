@@ -872,10 +872,10 @@ with st.container():
                 with fixed_memfile.open(**profile) as dst:
                     dst.write(band_data, 1)
 
-                st.write("Unique values in band:", np.unique(band))
-                st.write("Values at edges - first/last rows:")
-                st.write("Top edge:", np.unique(band[0:2, :]))
-                st.write("Bottom edge:", np.unique(band[-2:, :]))
+                print("Unique values in band:", np.unique(band))
+                print("Values at edges - first/last rows:")
+                print("Top edge:", np.unique(band[0:2, :]))
+                print("Bottom edge:", np.unique(band[-2:, :]))
 
                 tif_bytes = fixed_memfile.read()
 
