@@ -542,18 +542,35 @@ with st.container():
         #function to build scalebar
         def add_scalebar_from_ax_extent(ax, location='lower left'):
             
-             # Get ax extent and use it to set the length of scalebar
             xmin, xmax = ax.get_xlim()
             map_width_m = abs(xmax - xmin)
             scalebar_length = map_width_m / 3  
 
-            # Convert to miles by adjusting the dx value
-            # Use the conversion factor as dx and disable automatic unit formatting
+            # Manual approach: calculate appropriate length in meters that represents nice mile values
+            # Convert map width from meters to miles
+            map_width_miles = map_width_m * 0.000621371
+            
+            # Choose a nice round number of miles for the scalebar (1, 2, 5, 10, etc.)
+            if map_width_miles < 1:
+                target_miles = 0.5
+            elif map_width_miles < 3:
+                target_miles = 1
+            elif map_width_miles < 10:
+                target_miles = 2
+            elif map_width_miles < 20:
+                target_miles = 5
+            else:
+                target_miles = 10
+            
+            # Convert target miles back to meters
+            target_length_m = target_miles * 1609.34
+            
             scalebar = ScaleBar(
-                dx=0.000621371,  # conversion factor: meters to miles
-                units='',  # empty units to avoid automatic formatting
-                label='miles',  # custom label
-                length_fraction=scalebar_length / map_width_m,
+                dx=1,  # 1 meter per unit
+                units='m',
+                fixed_value=target_length_m,  # force specific length
+                fixed_units='m',
+                label=f'{target_miles} mile{"s" if target_miles != 1 else ""}',
                 location=location,
                 box_alpha=0.7,
                 color='black',
