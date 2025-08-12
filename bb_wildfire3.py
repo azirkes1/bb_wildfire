@@ -818,12 +818,19 @@ with st.container():
         with MemoryFile(io.BytesIO(original_tif)) as mem: 
             #opens tif file and reads it 
             with mem.open() as src:
+
+                
+
                 band_data = src.read(1)
                 width = src.width
                 height = src.height
                 dtype = src.dtypes[0]
                 count = src.count
                 profile = src.profile.copy()
+
+                st.write("STEP 2 - Before reprojection:")
+                st.write("  Unique values:", sorted(np.unique(band_data)))
+                st.write("  Shape:", band_data.shape)
 
                 #gets bounding box from geometry 
                 lonlat_coords = geometry['coordinates'][0]
@@ -855,7 +862,10 @@ with st.container():
 
                 #create empty base file
                 destination = np.empty((height, width), dtype=src.dtypes[0])
-
+                
+                st.write("STEP 3 - Empty destination array:")
+                st.write("  Unique values:", sorted(np.unique(destination)))
+                st.write("  Min/Max:", destination.min(), destination.max())
                 #reproject
                 reproject(
                     source=src.read(1),
@@ -866,6 +876,8 @@ with st.container():
                     dst_crs=dst_crs,
                     resampling=Resampling.nearest
                 )
+                st.write("STEP 4 - After reprojection:")
+                st.write("  Unique values:", sorted(np.unique(destination)))
 
                 # Write the new raster
                 fixed_memfile = MemoryFile()
