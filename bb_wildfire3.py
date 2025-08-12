@@ -35,6 +35,8 @@ import requests
 import geopandas as gpd
 from folium.plugins import MarkerCluster
 from scipy.ndimage import generic_filter
+from rasterio.enums import Resampling
+from rasterio.warp import calculate_default_transform, reproject
 # ---------------------------------------------------------
 #  authorize Google Earth Engine 
 # ---------------------------------------------------------
