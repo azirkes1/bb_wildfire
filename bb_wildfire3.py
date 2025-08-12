@@ -104,45 +104,54 @@ with st.container():
 
         /* Mobile sidebar styling - appear above main content */
         @media (max-width: 768px) {
-            /* Reorder the layout so sidebar appears first */
-            .main .block-container {
+            /* Force the entire sidebar container to be visible */
+            div[data-testid="stSidebar"] {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                position: static !important;
+                transform: translateX(0) !important;
+                width: 100% !important;
+                height: auto !important;
+                background-color: #f8f9fa !important;
+                border: 1px solid #e9ecef !important;
+                border-radius: 8px !important;
+                margin: 10px 0 20px 0 !important;
+                padding: 15px !important;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            }
+            
+            /* Target the sidebar content wrapper */
+            div[data-testid="stSidebar"] > div {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                overflow: visible !important;
+                height: auto !important;
+                width: 100% !important;
+            }
+            
+            /* Force all sidebar children to be visible */
+            div[data-testid="stSidebar"] * {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            
+            /* Hide the mobile sidebar toggle button if it exists */
+            button[kind="header"] {
+                display: none !important;
+            }
+            
+            /* Ensure main content comes after sidebar */
+            .main {
+                order: 2 !important;
+            }
+            
+            /* Make the entire app container flex */
+            .stApp {
                 display: flex !important;
                 flex-direction: column !important;
-            }
-            
-            /* Force sidebar to be visible and positioned above main content */
-            section[data-testid="stSidebar"] {
-                display: block !important;
-                visibility: visible !important;
-                position: relative !important;
-                width: 100% !important;
-                max-width: none !important;
-                min-width: none !important;
-                transform: none !important;
-                left: 0 !important;
-                order: -1 !important; /* This puts it first in flex order */
-                margin-bottom: 20px !important;
-                background-color: #f0f2f6 !important;
-                padding: 10px !important;
-                border-radius: 5px !important;
-            }
-            
-            /* Ensure sidebar content is visible */
-            section[data-testid="stSidebar"] > div {
-                display: block !important;
-                visibility: visible !important;
-                overflow: visible !important;
-                padding: 0 !important;
-            }
-            
-            /* Main content appears after sidebar */
-            .main .block-container > div:not([data-testid="stSidebar"]) {
-                order: 1 !important;
-            }
-            
-            /* Make sure sidebar button is visible if it exists */
-            button[data-testid="baseButton-headerNoPadding"] {
-                display: block !important;
             }
         }
 
@@ -168,12 +177,6 @@ with st.container():
     # Create title
     st.markdown(
         '<h1 style="font-size:28px;">Bristol Bay Wildfire Management Data Tool</h1>',
-        unsafe_allow_html=True
-    )
-
-    #create title
-    st.markdown(
-        '<h1 style="font-size:28px;">Bristol Bay Wildfire Management Data Tool</h1>', 
         unsafe_allow_html=True
     )
 
