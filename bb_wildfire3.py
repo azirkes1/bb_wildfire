@@ -791,11 +791,14 @@ with st.container():
             .unmask(-9999) \
             .setDefaultProjection('EPSG:3338', None, 30)
         
-        test_val = ee.Image(layer_recipe["ee_image"]) \
-            .sample(region=roi.centroid(), scale=30) \
+        pixel_sample = (
+            ee.Image(layer_recipe["ee_image"])
+            .sample(region=roi.bounds(), scale=30, numPixels=1, geometries=True)
             .first()
-        st.write(test_val.getInfo())
+            .getInfo()
+        )
 
+        st.write(pixel_sample)
         # Generate download URL — no reprojection in Python
         tiff_url = img_ee.getDownloadURL({
             'scale': 30,
