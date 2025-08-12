@@ -764,45 +764,38 @@ with st.container():
                         return zf.read(name)
                 raise ValueError("No .tif file found in the ZIP archive.")
             
-        def apply_majority_filter(data, window_size=3):
+        def apply_majority_filter(data, size=3):
             """
-            Apply a majority filter to remove isolated pixels and edge artifacts.
-            For each pixel, replace it with the most common value in its neighborhood.
+            Applies a majority filter to clean up small artifacts in raster data.
+            
+            Args:
+                data (np.ndarray): The input raster data.
+                size (int): The size of the filter window (e.g., 3 for a 3x3 window).
+                
+            Returns:
+                np.ndarray: The filtered raster data.
             """
-            from collections import Counter
-            
-            # Pad the array to handle edges
-            pad_size = window_size // 2
-            padded = np.pad(data, pad_size, mode='edge')
-            result = data.copy()
-            
-            # Apply majority filter
-            for i in range(data.shape[0]):
-                for j in range(data.shape[1]):
-                    # Extract neighborhood window
-                    window = padded[i:i+window_size, j:j+window_size]
+            # Define a function to find the majority value in a neighborhood
+            def majority(window):
+                # Flatten the window and get the unique values and their counts
+                unique_values, counts = np.unique(window, return_counts=True)
+                
+                # Exclude NoData values from the majority count
+                # Assuming -2147483648 is a NoData value. Adjust as needed.
+                nodata_mask = unique_values != -2147483648
+                unique_values = unique_values[nodata_mask]
+                counts = counts[nodata_mask]
+                
+                if unique_values.size > 0:
+                    # Return the value with the highest count
+                    return unique_values[np.argmax(counts)]
+                else:
+                    # If all pixels are NoData, return a NoData value
+                    return -2147483648
                     
-                    # Only process if current pixel might be an artifact
-                    current_val = data[i, j]
-                    
-                    # Skip NoData values
-                    if current_val in [-2147483648, 0]:
-                        continue
-                        
-                    # Get valid neighbors (exclude NoData)
-                    valid_neighbors = window[(window != -2147483648) & (window != 0)]
-                    
-                    if len(valid_neighbors) > 0:
-                        # Count occurrences of each value
-                        counts = Counter(valid_neighbors.flatten())
-                        most_common_val, most_common_count = counts.most_common(1)[0]
-                        
-                        # If current value is rare in neighborhood, replace it
-                        current_count = counts.get(current_val, 0)
-                        if current_count == 1 and most_common_count >= 3:
-                            result[i, j] = most_common_val
-            
-            return result
+            # Apply the generic_filter with the majority function
+            return generic_filter(data, majority, size=size)
+
     
         # ---------------------------------------------------------
         #  back to main img function - extracting TIF data
@@ -834,44 +827,7 @@ with st.container():
         #reads the ZIP file and extract the tif file
         zip_bytes = response.content
         original_tif = extract_tif_from_zip(zip_bytes)
-
-        # DIAGNOSTIC: Check if artifacts exist in original GEE data
-        with MemoryFile(io.BytesIO(original_tif)) as mem:
-            with mem.open() as src:
-                original_band = src.read(1)
-                st.write("=== ORIGINAL GEE DATA ANALYSIS ===")
-                st.write("Unique values:", sorted(np.unique(original_band)))
-                
-                # Check for suspicious FAA patterns in original data
-                faa_pixels = (original_band == 6)
-                st.write(f"FAA pixels in original: {np.sum(faa_pixels)}")
-                
-                # Check if FAA pixels are isolated (likely artifacts)
-                if np.sum(faa_pixels) > 0:
-                    # Simple isolation check
-                    isolated_faa = 0
-                    faa_locations = np.where(faa_pixels)
-                    
-                    for idx in range(min(100, len(faa_locations[0]))):  # Check first 100 FAA pixels
-                        i, j = faa_locations[0][idx], faa_locations[1][idx]
-                        
-                        # Check 3x3 neighborhood
-                        i_start, i_end = max(0, i-1), min(original_band.shape[0], i+2)
-                        j_start, j_end = max(0, j-1), min(original_band.shape[1], j+2)
-                        neighborhood = original_band[i_start:i_end, j_start:j_end]
-                        
-                        # Count non-FAA neighbors
-                        non_faa_neighbors = np.sum((neighborhood != 6) & (neighborhood != 0) & (neighborhood != -2147483648))
-                        faa_neighbors = np.sum(neighborhood == 6) - 1  # Exclude self
-                        
-                        if non_faa_neighbors >= 4 and faa_neighbors == 0:
-                            isolated_faa += 1
-                    
-                    st.write(f"Isolated FAA pixels in original (likely artifacts): {isolated_faa}")
-                    
-                    if isolated_faa > 50:
-                        st.write("⚠️ Many isolated FAA pixels detected in ORIGINAL GEE data!")
-                        st.write("The artifacts are coming from Google Earth Engine, not your processing.")
+    
         #pull colors and labels from layer recipe 
         cmap = layer_recipe["colors"]
         labels = layer_recipe["labels"]
@@ -899,10 +855,6 @@ with st.container():
                 count = src.count
                 profile = src.profile.copy()
 
-                st.write("STEP 2 - Before reprojection:")
-                st.write("  Unique values:", sorted(np.unique(band_data)))
-                st.write("  Shape:", band_data.shape)
-
                 lonlat_coords = geometry['coordinates'][0]
                 lons, lats = zip(*lonlat_coords)
                 xmin, xmax = min(lons), max(lons)
@@ -928,10 +880,7 @@ with st.container():
                 })
 
                 destination = np.empty((height, width), dtype=src.dtypes[0])
-
-                st.write("STEP 3 - Empty destination array:")
-                st.write("  Unique values:", sorted(np.unique(destination)))
-                st.write("  Min/Max:", destination.min(), destination.max())
+                cleaned_destination = apply_majority_filter(destination, size=3)
                 
                 # Reproject using mode resampling for categorical data
                 reproject(
@@ -943,14 +892,11 @@ with st.container():
                     dst_crs=dst_crs,
                     resampling=Resampling.mode
                 )
-
-                st.write("STEP 4 - After reprojection with mode resampling:")
-                st.write("  Unique values:", sorted(np.unique(destination)))
                 
                 # Write the REPROJECTED data directly
                 fixed_memfile = MemoryFile()
                 with fixed_memfile.open(**profile) as dst:
-                    dst.write(destination, 1)
+                    dst.write(cleaned_destination, 1)
 
                 tif_bytes = fixed_memfile.read()
 
