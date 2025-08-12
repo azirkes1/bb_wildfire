@@ -862,7 +862,7 @@ with st.container():
 
                 #create empty base file
                 destination = np.empty((height, width), dtype=src.dtypes[0])
-                
+
                 st.write("STEP 3 - Empty destination array:")
                 st.write("  Unique values:", sorted(np.unique(destination)))
                 st.write("  Min/Max:", destination.min(), destination.max())
@@ -895,7 +895,7 @@ with st.container():
                 
                     #read the band and create a mask for nodata values
                     band = src.read(1)
-                    nodata = src.nodata if src.nodata is not None else -9999
+                    nodata_values = [src.nodata, -2147483648, 0] if src.nodata else [-2147483648, 0]
                     # Mask both the official NoData and any 0 values that shouldn't exist
                     masked_band = np.ma.masked_equal(band, nodata)
                     masked_band = np.ma.masked_equal(masked_band, 0)  # Also mask any 0s
