@@ -765,54 +765,29 @@ with st.container():
                         return zf.read(name)
                 raise ValueError("No .tif file found in the ZIP archive.")
             
-        def apply_majority_filter(data, size=3):
-            """
-            Applies a majority filter to clean up small artifacts in raster data.
-            
-            Args:
-                data (np.ndarray): The input raster data.
-                size (int): The size of the filter window (e.g., 3 for a 3x3 window).
-                
-            Returns:
-                np.ndarray: The filtered raster data.
-            """
-            nodata_value = -2147483648  # Define your NoData value here
-
-            def majority(window):
-                # Create a boolean mask to identify valid data pixels (not NoData)
-                valid_mask = window != nodata_value
-                
-                # If there is no valid data in the window, return NoData
-                if not np.any(valid_mask):
-                    return nodata_value
-                    
-                # Get unique values and counts for only the valid pixels
-                valid_pixels = window[valid_mask]
-                unique_values, counts = np.unique(valid_pixels, return_counts=True)
-                
-                # Return the most frequent valid value
-                return unique_values[np.argmax(counts)]
-
-            # Apply the generic_filter with the majority function
-            # The `mode='constant'` and `cval=nodata_value` parameters
-            # ensure that the filter correctly handles the edges
-            return generic_filter(data, majority, size=size, mode='constant', cval=nodata_value)
+       
 
     
         # ---------------------------------------------------------
         #  back to main img function - extracting TIF data
         # ---------------------------------------------------------
         
-        #extract just the selected layer's recipe
+                
+        # Extract just the selected layer's recipe
         layer_recipe = recipe[layer_name] 
-       
-        #create metadata text file 
+
+        # Create metadata text file 
         txt_bytes = generate_text_metadata_file(recipe, layer_name) 
 
-        #get image to google earth engine and cast to int
-        img_ee = ee.Image(layer_recipe["ee_image"]).clip(roi).unmask(-9999).toInt()
+        # Get image to Google Earth Engine and cast to int
+        img_ee = (
+            ee.Image(layer_recipe["ee_image"])
+            .clip(roi)
+            .unmask(-9999)
+            .toInt()
+        )
 
-        #generate download URL with nearest resampling
+        # Generate download URL with EPSG:3338 and nearest resampling
         tiff_url = img_ee.getDownloadURL({
             'scale': 30,
             'crs': 'EPSG:3338',
@@ -822,116 +797,59 @@ with st.container():
                 'resampling': 'nearest'
             }
         })
-            
-        #sends HTTP GET request and returns ZIP file
-        response = requests.get(tiff_url)
 
-        #reads the ZIP file and extract the tif file
+        # Send HTTP GET request and return ZIP file
+        response = requests.get(tiff_url)
         zip_bytes = response.content
         original_tif = extract_tif_from_zip(zip_bytes)
-    
-        #pull colors and labels from layer recipe 
+
+        # Pull colors and labels from layer recipe 
         cmap = layer_recipe["colors"]
         labels = layer_recipe["labels"]
 
-        #get aspect ratio 
+        # Get aspect ratio 
         aspect = get_aspect_ratio(roi)
-        
-        #get layout type based on aspect ratio 
+
+        # Get layout type based on aspect ratio 
         if aspect > 3:
-            layout = "horizontal"  #wide → legend/locator below
+            layout = "horizontal"
         elif aspect < 1.5:
-            layout = "vertical"  #tall → legend/locator right
+            layout = "vertical"
         else:
-            layout = "square"  #square → default
+            layout = "square"
 
         # ---------------------------------------------------------
-        #   reproject tif
+        #  Create main PDF map — open directly without reprojection
         # ---------------------------------------------------------
         with MemoryFile(io.BytesIO(original_tif)) as mem:
             with mem.open() as src:
-                band_data = src.read(1)
-                width = src.width
-                height = src.height
-                dtype = src.dtypes[0]
-                count = src.count
-                profile = src.profile.copy()
-
-                lonlat_coords = geometry['coordinates'][0]
-                lons, lats = zip(*lonlat_coords)
-                xmin, xmax = min(lons), max(lons)
-                ymin, ymax = min(lats), max(lats)
-
-                transformer = Transformer.from_crs("EPSG:4326", "EPSG:3338", always_xy=True)
-                x0, y0 = transformer.transform(xmin, ymin)
-                x1, y1 = transformer.transform(xmax, ymax)
-
-                dst_crs = CRS.from_epsg(3338)
-                transform, width, height = calculate_default_transform(
-                    src.crs, dst_crs, src.width, src.height, *src.bounds
-                )
-
-                profile.update({
-                    'driver': 'GTiff',
-                    'height': height,
-                    'width': width,
-                    'count': count,
-                    'dtype': dtype,
-                    'crs': dst_crs,
-                    'transform': transform,
-                })
-
-                destination = np.empty((height, width), dtype=src.dtypes[0])
-                cleaned_destination = apply_majority_filter(destination, size=3)
-                
-                # Reproject using mode resampling for categorical data
-                reproject(
-                    source=src.read(1),
-                    destination=destination,
-                    src_transform=src.transform,
-                    src_crs=src.crs,
-                    dst_transform=transform,
-                    dst_crs=dst_crs,
-                    resampling=Resampling.mode
-                )
-                
-                # Write the REPROJECTED data directly
-                fixed_memfile = MemoryFile()
-                with fixed_memfile.open(**profile) as dst:
-                    dst.write(cleaned_destination, 1)
-
-                tif_bytes = fixed_memfile.read()
-
-        # ---------------------------------------------------------
-        #  create main pdf map 
-        # ---------------------------------------------------------
-        with MemoryFile(io.BytesIO(tif_bytes)) as mem:
-            with mem.open() as src:
-            
-                # --- create main map ---
                 band = src.read(1)
-                
+
                 # Handle multiple NoData values properly
-                # Both -2147483648 and 0 should be treated as NoData
                 nodata_values = [-2147483648, 0]
                 if src.nodata is not None:
                     nodata_values.append(src.nodata)
-                
-                # Convert raster to RGB image - start with white background
+
+                # Create a mask for valid data
+                valid_data_mask = ~np.isin(band, nodata_values)
+
+                # Convert raster to RGB with white background
                 rgb = np.ones((band.shape[0], band.shape[1], 3), dtype=np.uint8) * 255
-                
-                # Create a mask for valid data (exclude NoData values)
-                valid_data_mask = ~np.isin(band, [-2147483648, 0])
-                
-                # Apply colors ONLY to valid pixels with legitimate class values
+
+                # Apply colors only to valid pixels
                 for k, color in cmap.items():
-                    # Only color pixels that are: 1) valid data, 2) match the class value
                     class_pixels = valid_data_mask & (band == k)
                     rgb[class_pixels] = color
-                    
-                # Rest of your plotting code remains the same
+
+                # Get extent from raster transform
+                transform = src.transform
+                xmin = transform[2]
+                ymax = transform[5]
+                xmax = xmin + transform[0] * src.width
+                ymin = ymax + transform[4] * src.height
+                extent = [xmin, xmax, ymin, ymax]
+
                 proj = ccrs.epsg(3338)
-                extent = [x0, x1, y0, y1]
 
                 if layout == "vertical":
                     fig_size = (8, 11)
@@ -954,18 +872,13 @@ with st.container():
                     alpha=0.7,
                     linestyle='--'
                 )
-
-                gl.top_labels = False 
-                gl.right_labels = False 
-
+                gl.top_labels = False
+                gl.right_labels = False
                 gl.xlabel_style = {'size': 10}
                 gl.ylabel_style = {'size': 10}
 
-                width = src.width
-                height = src.height
-
                 add_scalebar_from_ax_extent(ax)
-                                        
+
                 buf = io.BytesIO()
                 plt.savefig(buf, format='png', bbox_inches='tight', dpi=150)
                 plt.close(fig)
