@@ -550,7 +550,7 @@ with st.container():
             # set scalebar properties
             scalebar = ScaleBar(
                 dx=1,               # Base value is 1
-                units='mi',         # Set base units as miles
+                units='miles',         # Set base units as miles
                 dimension='miles',  # Tell the library to work with miles
                 length_fraction=scalebar_length / map_width_m,
                 location=location,
@@ -559,7 +559,7 @@ with st.container():
                 font_properties="Arial"
             )
             ax.add_artist(scalebar)
-            
+
         #function to build locator map 
         def create_locator_map(clipped_geom, width=450, height=450, dpi=150): 
         
