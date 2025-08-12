@@ -225,8 +225,8 @@ with st.container():
             "Title": "Flammability Hazard",
             "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/haz_repro_rec').select('b1'),
             "colors": {
-                0: (189, 190, 190), 1: (101, 171, 20), 2: (196, 227, 29), 3: (249, 223, 26), 
-                4: (255, 154, 11), 5: (252, 59, 9)
+                0: (189, 190, 190), 1: (75, 101, 137), 2: (103, 166, 159), 3: (132, 196, 140), 
+                4: (250, 212, 131), 5: (253, 255, 193)
             },
             "labels": {
                 0: "No data", 1: "Very Low", 2: "Low", 3: "Moderate",
@@ -271,8 +271,6 @@ with st.container():
             """,
             unsafe_allow_html=True
         )
-
-    
 
     #data format multiselect
     options_filetype = '.tif', '.pdf'
