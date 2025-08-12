@@ -542,15 +542,15 @@ with st.container():
         #function to build scalebar
         def add_scalebar_from_ax_extent(ax, location='lower left'):
             
-            # Get ax extent and use it to set the length of scalebar
             xmin, xmax = ax.get_xlim()
             map_width_m = abs(xmax - xmin)
             scalebar_length = map_width_m / 3  
 
             # Set scalebar properties for miles
+            # Alternative approach: use imperial units
             scalebar = ScaleBar(
                 dx=1,  # 1 meter per unit in your coordinate system
-                units='mile',  # Changed to miles
+                units='imperial',  # This should work for miles
                 length_fraction=scalebar_length / map_width_m,
                 location=location,
                 box_alpha=0.7,
