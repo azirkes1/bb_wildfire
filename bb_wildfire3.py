@@ -547,13 +547,12 @@ with st.container():
             map_width_m = abs(xmax - xmin)
             scalebar_length = map_width_m / 3  
 
-            # Convert to miles manually
-            # 1 meter = 0.000621371 miles
-            # 1 mile = 1609.34 meters
+            # Convert to miles by adjusting the dx value
+            # Use the conversion factor as dx and disable automatic unit formatting
             scalebar = ScaleBar(
-                dx=1609.34,  # meters per mile
-                units='m',   # keep as meters but dx converts to miles
-                label='miles',  # custom label to show "miles"
+                dx=0.000621371,  # conversion factor: meters to miles
+                units='',  # empty units to avoid automatic formatting
+                label='miles',  # custom label
                 length_fraction=scalebar_length / map_width_m,
                 location=location,
                 box_alpha=0.7,
