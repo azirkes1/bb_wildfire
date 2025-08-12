@@ -916,18 +916,29 @@ with st.container():
                     
                     print("After masking - unique values:", sorted(np.unique(masked_band.compressed())))
                     
-                    # Convert raster to RGB image 
-                    rgb = np.ones((masked_band.shape[0], masked_band.shape[1], 3), dtype=np.uint8) * 255
+                    # Convert raster to RGB image - start with white background
+                    rgb = np.ones((band.shape[0], band.shape[1], 3), dtype=np.uint8) * 255
                     
-                    # Apply colors only to non-masked pixels
+                    # Create a mask for valid data (exclude NoData values)
+                    valid_data_mask = ~np.isin(band, [-2147483648, 0])
+                    
+                    # Apply colors ONLY to valid pixels with legitimate class values
                     for k, color in cmap.items():
-                        if hasattr(masked_band, 'mask'):
-                            # Handle masked array
-                            valid_pixels = ~masked_band.mask & (masked_band == k)
-                        else:
-                            # Handle regular array
-                            valid_pixels = (masked_band == k)
-                        rgb[valid_pixels] = color
+                        # Only color pixels that are: 1) valid data, 2) match the class value
+                        class_pixels = valid_data_mask & (band == k)
+                        rgb[class_pixels] = color
+                        
+                    # Debug info
+                    print(f"Class {k}: {np.sum(class_pixels)} pixels")
+                    
+                    # Additional debug - check what's happening with 0 values
+                    zero_pixels = (band == 0)
+                    print(f"Zero-value pixels: {np.sum(zero_pixels)} (these should stay white)")
+                    print(f"Valid data pixels: {np.sum(valid_data_mask)}")
+                    print(f"NoData pixels (-2147483648): {np.sum(band == -2147483648)}")
+                    
+                    # Ensure 0 and NoData pixels stay white (don't get colored)
+                    rgb[~valid_data_mask] = [255, 255, 255]
 
                     # Rest of your plotting code remains the same
                     proj = ccrs.epsg(3338)
@@ -971,7 +982,7 @@ with st.container():
                     plt.close(fig)
                     buf.seek(0)
                     map_img = Image.open(buf)
-                
+                            
             # ---------------------------------------------------------
             #  build legend and locator map
             # ---------------------------------------------------------
