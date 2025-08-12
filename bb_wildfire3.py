@@ -772,21 +772,18 @@ with st.container():
         #  back to main img function - extracting TIF data
         # ---------------------------------------------------------
         
-         # Extract just the selected layer's recipe
-        layer_recipe = recipe[layer_name]
+        # Get classified image
+        classified = ee.Image(layer_recipe["ee_image"]).toInt()
 
-        # Create metadata text file
-        txt_bytes = generate_text_metadata_file(recipe, layer_name)
+        # Create pixel-aligned mask from ROI
+        mask = ee.Image.constant(1).toInt() \
+            .clip(roi) \
+            .reproject(classified.projection())
 
-        # Force projection & pixel alignment inside EE
-        img_ee = (
-            ee.Image(layer_recipe["ee_image"])
-            .clip(roi)
-            .unmask(-9999)
-            .toInt()
-            .reproject(crs='EPSG:3338', scale=30)  # lock projection
+        # Apply mask before clipping
+        img_ee = classified.updateMask(mask) \
+            .unmask(-9999) \
             .setDefaultProjection('EPSG:3338', None, 30)
-        )
 
         # Generate download URL — no reprojection happens now
         tiff_url = img_ee.getDownloadURL({
