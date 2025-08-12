@@ -772,130 +772,116 @@ with st.container():
         #  back to main img function - extracting TIF data
         # ---------------------------------------------------------
         
-        # Extract just the selected layer's recipe
         layer_recipe = recipe[layer_name]
-
-        # Create metadata text file
-        txt_bytes = generate_text_metadata_file(recipe, layer_name)
-
-        # Get the classified image as int
         classified_img = ee.Image(layer_recipe["ee_image"]).toInt()
 
-        # Create a hard pixel mask from the ROI that matches the image's native projection
-        pixel_mask = ee.Image.constant(1).toInt() \
-            .clip(roi) \
-            .reproject(classified_img.projection())
+        # Get the native projection info from the EE image
+        native_proj = classified_img.projection().getInfo()
+        native_crs = native_proj['crs']           # e.g. 'EPSG:32612'
+        native_transform = native_proj['transform']  # [scaleX, shearX, translateX, shearY, scaleY, translateY]
 
-        # Apply the mask BEFORE clipping to avoid fractional pixels being resampled
-        img_ee = classified_img.updateMask(pixel_mask) \
-            .unmask(-9999) \
-            .setDefaultProjection('EPSG:3338', None, 30)
-        
-        pixel_sample = (
-            ee.Image(layer_recipe["ee_image"])
-            .sample(region=roi.bounds(), scale=30, numPixels=1, geometries=True)
-            .first()
-            .getInfo()
-        )
+        # Create hard pixel mask clipped to ROI in native projection
+        pixel_mask = ee.Image.constant(1).toInt().clip(roi).reproject(classified_img.projection())
 
-        st.write(pixel_sample)
-        # Generate download URL — no reprojection in Python
+        # Apply mask BEFORE clipping to avoid fractional pixels resampled in EE
+        img_ee = classified_img.updateMask(pixel_mask).unmask(-9999).setDefaultProjection(native_crs, None, native_proj['scale'])
+
+        # Generate download URL WITHOUT reprojection (no 'crs' parameter)
         tiff_url = img_ee.getDownloadURL({
-            'scale': 30,
-            'crs': 'EPSG:3338',
+            'scale': native_proj['scale'],
             'region': roi.getInfo()['coordinates'],
             'filePerBand': False
         })
 
-        # Download ZIP and extract TIFF
+        # Download and extract the original TIFF (in native CRS)
         response = requests.get(tiff_url)
         zip_bytes = response.content
         original_tif = extract_tif_from_zip(zip_bytes)
 
-        # No reprojection — just assign
-        tif_bytes = original_tif
-
-        # Pull colors and labels from layer recipe 
-        cmap = layer_recipe["colors"]
-        labels = layer_recipe["labels"]
-
-        # Get aspect ratio 
-        aspect = get_aspect_ratio(roi)
-
-        # Get layout type based on aspect ratio 
-        if aspect > 3:
-            layout = "horizontal"
-        elif aspect < 1.5:
-            layout = "vertical"
-        else:
-            layout = "square"
-
-        # ---------------------------------------------------------
-        #  Create main PDF map — open directly without reprojection
-        # ---------------------------------------------------------
+        # Open the original TIFF with rasterio
         with MemoryFile(io.BytesIO(original_tif)) as mem:
             with mem.open() as src:
-                band = src.read(1)
+                # Prepare destination metadata for reprojection to EPSG:3338 with scale 30
+                dst_crs = 'EPSG:3338'
+                dst_transform, dst_width, dst_height = calculate_default_transform(
+                    src.crs, dst_crs, src.width, src.height, *src.bounds, resolution=30)
+                
+                dst_profile = src.profile.copy()
+                dst_profile.update({
+                    'crs': dst_crs,
+                    'transform': dst_transform,
+                    'width': dst_width,
+                    'height': dst_height,
+                    'nodata': -9999,
+                })
 
-                # Handle multiple NoData values properly
-                nodata_values = [-2147483648, 0]
-                if src.nodata is not None:
-                    nodata_values.append(src.nodata)
+                # Prepare destination array
+                dst_array = np.empty((dst_height, dst_width), dtype=src.dtypes[0])
 
-                # Create a mask for valid data
-                valid_data_mask = ~np.isin(band, nodata_values)
-
-                # Convert raster to RGB with white background
-                rgb = np.ones((band.shape[0], band.shape[1], 3), dtype=np.uint8) * 255
-
-                # Apply colors only to valid pixels
-                for k, color in cmap.items():
-                    class_pixels = valid_data_mask & (band == k)
-                    rgb[class_pixels] = color
-
-                # Get extent from raster transform
-                transform = src.transform
-                xmin = transform[2]
-                ymax = transform[5]
-                xmax = xmin + transform[0] * src.width
-                ymin = ymax + transform[4] * src.height
-                extent = [xmin, xmax, ymin, ymax]
-
-                proj = ccrs.epsg(3338)
-
-                if layout == "vertical":
-                    fig_size = (8, 11)
-                elif layout == "horizontal":
-                    fig_size = (11, 8)
-                else:
-                    fig_size = (10, 10)
-
-                fig, ax = plt.subplots(figsize=fig_size, subplot_kw={'projection': proj})
-                ax.imshow(rgb, origin='upper', extent=extent)
-                ax.set_extent(extent, crs=proj)
-                ax.set_title(f"{layer_name} Map", fontsize=18)
-                ax.set_aspect('equal')
-
-                gl = ax.gridlines(
-                    crs=ccrs.PlateCarree(),
-                    draw_labels=True,
-                    linewidth=0.8,
-                    color='gray',
-                    alpha=0.7,
-                    linestyle='--'
+                # Reproject once using nearest neighbor resampling
+                reproject(
+                    source=rasterio.band(src, 1),
+                    destination=dst_array,
+                    src_transform=src.transform,
+                    src_crs=src.crs,
+                    dst_transform=dst_transform,
+                    dst_crs=dst_crs,
+                    resampling=Resampling.nearest,
+                    dst_nodata=-9999
                 )
-                gl.top_labels = False
-                gl.right_labels = False
-                gl.xlabel_style = {'size': 10}
-                gl.ylabel_style = {'size': 10}
 
-                add_scalebar_from_ax_extent(ax)
+        # Now use dst_array as your classified band for coloring, plotting, etc.
+        # Convert to RGB with white background and apply colors
+        nodata_values = [-2147483648, 0, -9999]
+        valid_data_mask = ~np.isin(dst_array, nodata_values)
+        rgb = np.ones((dst_array.shape[0], dst_array.shape[1], 3), dtype=np.uint8) * 255
+        for k, color in cmap.items():
+            class_pixels = valid_data_mask & (dst_array == k)
+            rgb[class_pixels] = color
 
-                buf = io.BytesIO()
-                plt.savefig(buf, format='png', bbox_inches='tight', dpi=150)
-                plt.close(fig)
-                buf.seek(0)
-                map_img = Image.open(buf)
+        # Extent from dst_transform for plotting
+        xmin = dst_transform[2]
+        ymax = dst_transform[5]
+        xmax = xmin + dst_transform[0] * dst_width
+        ymin = ymax + dst_transform[4] * dst_height
+        extent = [xmin, xmax, ymin, ymax]
+
+        proj = ccrs.epsg(3338)
+
+        # Layout logic remains the same
+        if layout == "vertical":
+            fig_size = (8, 11)
+        elif layout == "horizontal":
+            fig_size = (11, 8)
+        else:
+            fig_size = (10, 10)
+
+        fig, ax = plt.subplots(figsize=fig_size, subplot_kw={'projection': proj})
+        ax.imshow(rgb, origin='upper', extent=extent)
+        ax.set_extent(extent, crs=proj)
+        ax.set_title(f"{layer_name} Map", fontsize=18)
+        ax.set_aspect('equal')
+
+        gl = ax.gridlines(
+            crs=ccrs.PlateCarree(),
+            draw_labels=True,
+            linewidth=0.8,
+            color='gray',
+            alpha=0.7,
+            linestyle='--'
+        )
+        gl.top_labels = False
+        gl.right_labels = False
+        gl.xlabel_style = {'size': 10}
+        gl.ylabel_style = {'size': 10}
+
+        add_scalebar_from_ax_extent(ax)
+
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', bbox_inches='tight', dpi=150)
+        plt.close(fig)
+        buf.seek(0)
+        map_img = Image.open(buf)
                             
             # ---------------------------------------------------------
             #  build legend and locator map
