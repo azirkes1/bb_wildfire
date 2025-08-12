@@ -785,8 +785,8 @@ with st.container():
             .clip(roi)
             .unmask(-9999)
             .toInt()
+            .reproject(crs='EPSG:3338', scale=30)  # force grid alignment
         )
-
         # Generate download URL with EPSG:3338 and nearest resampling
         tiff_url = img_ee.getDownloadURL({
             'scale': 30,
