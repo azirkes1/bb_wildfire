@@ -772,30 +772,28 @@ with st.container():
         #  back to main img function - extracting TIF data
         # ---------------------------------------------------------
         
-                
-        # Extract just the selected layer's recipe
-        layer_recipe = recipe[layer_name] 
+         # Extract just the selected layer's recipe
+        layer_recipe = recipe[layer_name]
 
-        # Create metadata text file 
-        txt_bytes = generate_text_metadata_file(recipe, layer_name) 
+        # Create metadata text file
+        txt_bytes = generate_text_metadata_file(recipe, layer_name)
 
-        # Get image to Google Earth Engine and cast to int
+        # Force projection & pixel alignment inside EE
         img_ee = (
             ee.Image(layer_recipe["ee_image"])
             .clip(roi)
             .unmask(-9999)
             .toInt()
-            .reproject(crs='EPSG:3338', scale=30)  # force grid alignment
+            .reproject(crs='EPSG:3338', scale=30)  # lock projection
+            .setDefaultProjection('EPSG:3338', None, 30)
         )
-        # Generate download URL with EPSG:3338 and nearest resampling
+
+        # Generate download URL — no reprojection happens now
         tiff_url = img_ee.getDownloadURL({
             'scale': 30,
             'crs': 'EPSG:3338',
             'region': roi.getInfo()['coordinates'],
-            'filePerBand': False,
-            'formatOptions': {
-                'resampling': 'nearest'
-            }
+            'filePerBand': False
         })
 
         # Send HTTP GET request and return ZIP file
@@ -803,7 +801,7 @@ with st.container():
         zip_bytes = response.content
         original_tif = extract_tif_from_zip(zip_bytes)
 
-        # Assign directly — no reprojection
+        # Assign directly — no reprojection in Python
         tif_bytes = original_tif
 
         # Pull colors and labels from layer recipe 
