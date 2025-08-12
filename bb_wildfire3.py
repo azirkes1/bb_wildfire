@@ -548,7 +548,7 @@ with st.container():
             scalebar_length = map_width_m / 3
 
             # set scalebar properties
-             scalebar = ScaleBar(
+            scalebar = ScaleBar(
                 dx=1609.344,  # The number of meters in one mile
                 units='m',    # Correct unit for dx, as per the library's expectation
                 label='miles', # Use a custom label to display 'miles'
