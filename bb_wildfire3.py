@@ -549,15 +549,20 @@ with st.container():
 
             # Set scalebar properties
             scalebar = ScaleBar(
-                dx=1,               # Base value is 1 unit of the map's CRS (meters)
-                units='m',          # Use a supported unit for internal calculations
+                dx=1000,               # Set dx to 1000 meters (1 km)
+                units='m',             # Use meters for internal calculations
                 length_fraction=scalebar_length / map_width_m,
                 location=location,
                 box_alpha=0.7,
                 color='black',
                 font_properties="Arial",
-                # Use scale_formatter to convert meters to miles
-                scale_formatter=lambda value, unit: f"{value / 1609.344:.0f} miles",
+                scale_formatter=lambda value, unit: (
+                    # Convert to miles for values greater than one mile
+                    f"{value / 1609.344:.0f} miles"
+                    if value >= 1609.344
+                    # Convert to kilometers for values between one km and one mile
+                    else f"{value / 1000:.0f} km"
+                ),
             )
             ax.add_artist(scalebar)
 
