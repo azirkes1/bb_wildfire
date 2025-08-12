@@ -872,10 +872,6 @@ with st.container():
                 with fixed_memfile.open(**profile) as dst:
                     dst.write(band_data, 1)
 
-                print("Unique values in band:", np.unique(band))
-                print("Values at edges - first/last rows:")
-                print("Top edge:", np.unique(band[0:2, :]))
-                print("Bottom edge:", np.unique(band[-2:, :]))
 
                 tif_bytes = fixed_memfile.read()
 
@@ -888,8 +884,17 @@ with st.container():
                     #read the band and create a mask for nodata values
                     band = src.read(1)
                     nodata = src.nodata or 0
-                    masked_band = np.ma.masked_equal(band, nodata) #create mask that excludes nodata
+                    
 
+                    st.write("Unique values in band:", np.unique(band))
+                    st.write("NoData value:", nodata)
+                    st.write("Values at edges - first/last rows:")
+                    st.write("Top edge:", np.unique(band[0:2, :]))
+                    st.write("Bottom edge:", np.unique(band[-2:, :]))
+                    st.write("Left edge:", np.unique(band[:, 0:2]))
+                    st.write("Right edge:", np.unique(band[:, -2:]))
+                    
+                    masked_band = np.ma.masked_equal(band, nodata) #create mask that excludes nodata
                     #convert raster to RGB image 
                     rgb = np.ones((masked_band.shape[0], masked_band.shape[1], 3), dtype=np.uint8) * 255
                     for k, color in cmap.items():
