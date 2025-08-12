@@ -954,6 +954,24 @@ with st.container():
                             st.write(f"Problem colors: {np.unique(problem_colors.reshape(-1, 3), axis=0)}")
                         else:
                             st.write("✓ All zero-value pixels are correctly white")
+
+                    st.write("\n=== FAA PIXEL ANALYSIS ===")
+                    faa_pixels = (band == 6)
+                    st.write(f"FAA (class 6) pixels: {np.sum(faa_pixels)}")
+
+                    # Check if FAA pixels form thin lines (high edge count relative to area)
+                    if np.sum(faa_pixels) > 0:
+                        # Simple edge detection - count FAA pixels with non-FAA neighbors
+                        from scipy import ndimage
+                        faa_edges = ndimage.binary_erosion(faa_pixels) != faa_pixels
+                        edge_count = np.sum(faa_edges & faa_pixels)
+                        st.write(f"FAA edge pixels: {edge_count}")
+                        st.write(f"FAA edge ratio: {edge_count / np.sum(faa_pixels):.2f}")
+                        
+                        if edge_count / np.sum(faa_pixels) > 0.5:
+                            st.write("⚠️ FAA pixels form mostly thin lines/boundaries")
+                        else:
+                            st.write("✓ FAA pixels form solid areas")
                     
                     # Double-check: explicitly force 0 and NoData pixels to white
                     rgb[band == 0] = [255, 255, 255]
