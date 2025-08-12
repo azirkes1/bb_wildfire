@@ -15,4 +15,4 @@ shapely
 pyproj
 cartopy
 matplotlib-scalebar
-scipy.ndimage
+scipy
