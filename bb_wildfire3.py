@@ -830,58 +830,58 @@ with st.container():
                     dst_nodata=-9999
                 )
 
-        # Now use dst_array as your classified band for coloring, plotting, etc.
-        # Convert to RGB with white background and apply colors
-        nodata_values = [-2147483648, 0, -9999]
-        valid_data_mask = ~np.isin(dst_array, nodata_values)
-        rgb = np.ones((dst_array.shape[0], dst_array.shape[1], 3), dtype=np.uint8) * 255
-        for k, color in cmap.items():
-            class_pixels = valid_data_mask & (dst_array == k)
-            rgb[class_pixels] = color
+                # Now use dst_array as your classified band for coloring, plotting, etc.
+                # Convert to RGB with white background and apply colors
+                nodata_values = [-2147483648, 0, -9999]
+                valid_data_mask = ~np.isin(dst_array, nodata_values)
+                rgb = np.ones((dst_array.shape[0], dst_array.shape[1], 3), dtype=np.uint8) * 255
+                for k, color in cmap.items():
+                    class_pixels = valid_data_mask & (dst_array == k)
+                    rgb[class_pixels] = color
 
-        # Extent from dst_transform for plotting
-        xmin = dst_transform[2]
-        ymax = dst_transform[5]
-        xmax = xmin + dst_transform[0] * dst_width
-        ymin = ymax + dst_transform[4] * dst_height
-        extent = [xmin, xmax, ymin, ymax]
+                # Extent from dst_transform for plotting
+                xmin = dst_transform[2]
+                ymax = dst_transform[5]
+                xmax = xmin + dst_transform[0] * dst_width
+                ymin = ymax + dst_transform[4] * dst_height
+                extent = [xmin, xmax, ymin, ymax]
 
-        proj = ccrs.epsg(3338)
+                proj = ccrs.epsg(3338)
 
-        # Layout logic remains the same
-        if layout == "vertical":
-            fig_size = (8, 11)
-        elif layout == "horizontal":
-            fig_size = (11, 8)
-        else:
-            fig_size = (10, 10)
+                # Layout logic remains the same
+                if layout == "vertical":
+                    fig_size = (8, 11)
+                elif layout == "horizontal":
+                    fig_size = (11, 8)
+                else:
+                    fig_size = (10, 10)
 
-        fig, ax = plt.subplots(figsize=fig_size, subplot_kw={'projection': proj})
-        ax.imshow(rgb, origin='upper', extent=extent)
-        ax.set_extent(extent, crs=proj)
-        ax.set_title(f"{layer_name} Map", fontsize=18)
-        ax.set_aspect('equal')
+                fig, ax = plt.subplots(figsize=fig_size, subplot_kw={'projection': proj})
+                ax.imshow(rgb, origin='upper', extent=extent)
+                ax.set_extent(extent, crs=proj)
+                ax.set_title(f"{layer_name} Map", fontsize=18)
+                ax.set_aspect('equal')
 
-        gl = ax.gridlines(
-            crs=ccrs.PlateCarree(),
-            draw_labels=True,
-            linewidth=0.8,
-            color='gray',
-            alpha=0.7,
-            linestyle='--'
-        )
-        gl.top_labels = False
-        gl.right_labels = False
-        gl.xlabel_style = {'size': 10}
-        gl.ylabel_style = {'size': 10}
+                gl = ax.gridlines(
+                    crs=ccrs.PlateCarree(),
+                    draw_labels=True,
+                    linewidth=0.8,
+                    color='gray',
+                    alpha=0.7,
+                    linestyle='--'
+                )
+                gl.top_labels = False
+                gl.right_labels = False
+                gl.xlabel_style = {'size': 10}
+                gl.ylabel_style = {'size': 10}
 
-        add_scalebar_from_ax_extent(ax)
+                add_scalebar_from_ax_extent(ax)
 
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png', bbox_inches='tight', dpi=150)
-        plt.close(fig)
-        buf.seek(0)
-        map_img = Image.open(buf)
+                buf = io.BytesIO()
+                plt.savefig(buf, format='png', bbox_inches='tight', dpi=150)
+                plt.close(fig)
+                buf.seek(0)
+                map_img = Image.open(buf)
                             
             # ---------------------------------------------------------
             #  build legend and locator map
