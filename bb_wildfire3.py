@@ -550,7 +550,7 @@ with st.container():
             # Set scalebar properties for miles
             scalebar = ScaleBar(
                 dx=1,  # 1 meter per unit in your coordinate system
-                units='miles',  # Changed to miles
+                units='mile',  # Changed to miles
                 length_fraction=scalebar_length / map_width_m,
                 location=location,
                 box_alpha=0.7,
