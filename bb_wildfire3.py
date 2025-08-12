@@ -574,7 +574,9 @@ with st.container():
                 location=location,
                 box_alpha=0.7,
                 color='black',
-                font_properties="Arial"
+                font_properties="Arial",
+                label_formatter=lambda value, unit: f'{target_miles} mile{"s" if target_miles != 1 else ""}',  # Override the formatter
+                scale_formatter=lambda value, unit: ''  # Hide the scale text
             )
             ax.add_artist(scalebar)
 
