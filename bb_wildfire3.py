@@ -225,7 +225,7 @@ with st.container():
             "Title": "Flammability Hazard",
             "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/haz_repro_rec').select('b1'),
             "colors": {
-                0: (189, 190, 190), 1: (75, 101, 137), 2: (103, 166, 159), 3: (132, 196, 140), 
+                0: (255, 255, 255), 1: (75, 101, 137), 2: (103, 166, 159), 3: (132, 196, 140), 
                 4: (250, 212, 131), 5: (253, 255, 193)
             },
             "labels": {
