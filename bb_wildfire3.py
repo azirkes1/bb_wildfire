@@ -477,24 +477,25 @@ with st.container():
             return width / height if height > 0 else float('inf')
 
         #function to build legend 
-        def build_legend_image(colors, labels, present, map_h): 
+        def build_legend_image(colors, labels, present, map_h, layer_name): 
+            # Use de_duplicate_entries unless the layer is Flammability Hazard
+            if layer_name == "Flammability Hazard":
+                shown_keys = sorted(colors.keys())
+            else:
+                colors, labels = de_duplicate_entries(colors, labels, present)
+                shown_keys = sorted(colors.keys())
 
-            #use De_duplicate to get colors and labels
-            colors, labels = de_duplicate_entries(colors, labels, present)
-            shown_keys = sorted(colors.keys())
-
-            #set font size based on map height
+            # set font size based on map height
             scale = map_h / 1000
             font_size = max(int(12 * scale), 12)
 
             patches = []
             for k in shown_keys:
-
-                #retrives rgb tuple and normalizes it 
+                # retrieves rgb tuple and normalizes it 
                 rgb = tuple(colors[k])
                 normalized_color = [v / 255 for v in rgb]
 
-                #if it's white, create patch with a black edge
+                # if it's white, create patch with a black edge
                 if rgb == (255, 255, 255):
                     patch = mpatches.Patch(
                         facecolor=normalized_color,
@@ -503,15 +504,15 @@ with st.container():
                         label=labels.get(k, str(k))
                     )
                 else: 
-                    #create patch with defaults
+                    # create patch with defaults
                     patch = mpatches.Patch(
                         color=normalized_color,
                         label=labels.get(k, str(k))
                     )
-                #add patches to list 
+                # add patches to list 
                 patches.append(patch)
 
-            #create a blank figure and adds legend and patches
+            # create a blank figure and adds legend and patches
             fig = plt.figure()
             legend = fig.legend(
                 handles=patches,
@@ -523,17 +524,17 @@ with st.container():
                 handletextpad=0.6
             )
 
-            #adds legend to canvas
+            # adds legend to canvas
             canvas = FigureCanvas(fig)
-            fig.set_size_inches(6, len(patches) * 0.4 + 0.4)  #scales the height depending on number of patches 
+            fig.set_size_inches(6, len(patches) * 0.4 + 0.4)
             canvas.draw()
 
-            #crop legend to content 
-            bbox = legend.get_window_extent() #gets bounding box
-            bbox = bbox.expanded(1.05, 1.05)  #slight padding
-            image = np.frombuffer(canvas.buffer_rgba(), dtype='uint8').reshape(canvas.get_width_height()[::-1] + (4,)) #extractsRGBA buffer and formats it in numpy array 
-            legend_img = Image.fromarray(image) #converts to PIL image
-            legend_img = legend_img.crop((int(bbox.x0), int(bbox.y0), int(bbox.x1), int(bbox.y1))) #crop legend
+            # crop legend to content 
+            bbox = legend.get_window_extent()
+            bbox = bbox.expanded(1.05, 1.05)
+            image = np.frombuffer(canvas.buffer_rgba(), dtype='uint8').reshape(canvas.get_width_height()[::-1] + (4,))
+            legend_img = Image.fromarray(image)
+            legend_img = legend_img.crop((int(bbox.x0), int(bbox.y0), int(bbox.x1), int(bbox.y1)))
 
             plt.close(fig)
             return legend_img
