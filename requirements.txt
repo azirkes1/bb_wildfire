@@ -1,0 +1,15 @@
+earthengine-api
+streamlit
+folium
+streamlit-folium
+numpy
+rasterio
+Pillow
+geopandas
+matplotlib
+contextily
+cartopy
+pyproj
+shapely
+requests
+matplotlib-scalebar
