@@ -61,113 +61,6 @@ ee.Initialize(credentials)
 
 #everything resides in this container, helps to reduce padding
 with st.container():
-
-    mobile_detection = """
-        <script>
-        function isMobile() {
-            return window.innerWidth <= 768;
-        }
-
-        if (isMobile()) {
-            document.body.classList.add('mobile-device');
-        } else {
-            document.body.classList.add('desktop-device');
-        }
-        </script>
-        """
-
-        # Updated CSS with mobile detection
-        st.markdown(mobile_detection, unsafe_allow_html=True)
-
-        st.markdown("""
-        <style>
-        /* Hide mobile content on desktop */
-        .desktop-device .mobile-only {
-            display: none !important;
-        }
-
-        /* Hide sidebar on mobile, show mobile content */
-        .mobile-device section[data-testid="stSidebar"] {
-            display: none !important;
-        }
-
-        .mobile-device .desktop-only {
-            display: none !important;
-        }
-
-        /* Style mobile content */
-        .mobile-content {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        /* Your existing styles... */
-        .block-container {
-            padding-top: 0.5rem !important;
-            padding-bottom: 0.5rem !important;
-        }
-
-        /* ... rest of your existing CSS ... */
-        </style>
-        """, unsafe_allow_html=True)
-
-        # Mobile-only content (appears at top on mobile)
-        st.markdown('<div class="mobile-only">', unsafe_allow_html=True)
-        st.markdown('<div class="mobile-content">', unsafe_allow_html=True)
-
-        # Mobile version of your sidebar content
-        selected_options_mobile = st.multiselect(
-            "Which data layers would you like to download? (Mobile)",
-            list(recipe.keys()),
-            key="mobile_multiselect_1"
-        )
-
-        st.markdown(
-            """
-            <div style='color: #808080; margin-bottom: 15px;'>
-                <u>Ownership</u> - Bureau of Land Management<br>
-                <u>Land cover</u> - National Land Cover Database<br>
-                <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
-                <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        selected_filetype_mobile = st.multiselect(
-            "What format do you want the data in? (Mobile)",
-            ['.tif', '.pdf'],
-            key="mobile_multiselect_2"
-        )
-
-        st.markdown(
-            """
-            <div style='color: #808080; margin-bottom: 15px;'>
-                PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        # Regular sidebar (hidden on mobile)
-        with st.sidebar:
-            st.markdown('<div class="desktop-only">', unsafe_allow_html=True)
-            selected_options = st.multiselect(
-                "Which data layers would you like to download?",
-                list(recipe.keys())
-            )
-            
-            # ... your existing sidebar content ...
-            st.markdown('</div>', unsafe_allow_html=True)
-    # ---------------------------------------------------------
-    #  define metadata - title, ee_image, colors, labels, credits
-    # ---------------------------------------------------------
     recipe = {
             "Ownership": {
                 "Title": "Land Ownership",
@@ -278,6 +171,113 @@ with st.container():
                     "Alaska Natural Resource Management. Accessed April 01, 2025. "
                     "https://alaskanrm.com/wildfire-exposure/."
         }}
+    mobile_detection = """
+        <script>
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
+
+        if (isMobile()) {
+            document.body.classList.add('mobile-device');
+        } else {
+            document.body.classList.add('desktop-device');
+        }
+        </script>
+        """
+
+        # Updated CSS with mobile detection
+    st.markdown(mobile_detection, unsafe_allow_html=True)
+
+    st.markdown("""
+    <style>
+    /* Hide mobile content on desktop */
+    .desktop-device .mobile-only {
+        display: none !important;
+    }
+
+    /* Hide sidebar on mobile, show mobile content */
+    .mobile-device section[data-testid="stSidebar"] {
+        display: none !important;
+    }
+
+    .mobile-device .desktop-only {
+        display: none !important;
+    }
+
+    /* Style mobile content */
+    .mobile-content {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    /* Your existing styles... */
+    .block-container {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+
+    /* ... rest of your existing CSS ... */
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Mobile-only content (appears at top on mobile)
+    st.markdown('<div class="mobile-only">', unsafe_allow_html=True)
+    st.markdown('<div class="mobile-content">', unsafe_allow_html=True)
+
+    # Mobile version of your sidebar content
+    selected_options_mobile = st.multiselect(
+        "Which data layers would you like to download? (Mobile)",
+        list(recipe.keys()),
+        key="mobile_multiselect_1"
+    )
+
+    st.markdown(
+        """
+        <div style='color: #808080; margin-bottom: 15px;'>
+            <u>Ownership</u> - Bureau of Land Management<br>
+            <u>Land cover</u> - National Land Cover Database<br>
+            <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
+            <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    selected_filetype_mobile = st.multiselect(
+        "What format do you want the data in? (Mobile)",
+        ['.tif', '.pdf'],
+        key="mobile_multiselect_2"
+    )
+
+    st.markdown(
+        """
+        <div style='color: #808080; margin-bottom: 15px;'>
+            PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Regular sidebar (hidden on mobile)
+    with st.sidebar:
+        st.markdown('<div class="desktop-only">', unsafe_allow_html=True)
+        selected_options = st.multiselect(
+            "Which data layers would you like to download?",
+            list(recipe.keys())
+        )
+        
+        # ... your existing sidebar content ...
+        st.markdown('</div>', unsafe_allow_html=True)
+    # ---------------------------------------------------------
+    #  define metadata - title, ee_image, colors, labels, credits
+    # ---------------------------------------------------------
+   
     
     # ---------------------------------------------------------
     #  add elements to app
