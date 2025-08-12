@@ -963,10 +963,6 @@ with MemoryFile(io.BytesIO(original_tif)) as mem:
                 # --- create main map ---
                 band = src.read(1)
                 
-                st.write("STEP 5 - Final band for visualization:")
-                st.write("  Unique values:", sorted(np.unique(band)))
-                st.write("  NoData value:", src.nodata)
-                
                 # Handle multiple NoData values properly
                 # Both -2147483648 and 0 should be treated as NoData
                 nodata_values = [-2147483648, 0]
@@ -985,72 +981,6 @@ with MemoryFile(io.BytesIO(original_tif)) as mem:
                     class_pixels = valid_data_mask & (band == k)
                     rgb[class_pixels] = color
                     
-                st.write(f"\n=== RGB PROCESSING DEBUG ===")
-                for k, color in cmap.items():
-                    class_pixels = valid_data_mask & (band == k)
-                    st.write(f"Class {k} ({labels.get(k, 'Unknown')}): {np.sum(class_pixels)} pixels -> color {color}")
-
-                st.write(f"Zero-value pixels: {np.sum(band == 0)} (these should stay white)")
-                st.write(f"NoData pixels (-2147483648): {np.sum(band == -2147483648)}")
-                st.write(f"Valid data pixels: {np.sum(valid_data_mask)}")
-                st.write(f"Total pixels: {band.size}")
-
-                # Check if any 0-value pixels are accidentally getting colored
-                zero_pixels_mask = (band == 0)
-                if np.sum(zero_pixels_mask) > 0:
-                    # Check what colors the zero pixels have in the final RGB
-                    zero_rgb = rgb[zero_pixels_mask]
-                    unique_zero_colors = np.unique(zero_rgb.reshape(-1, 3), axis=0)
-                    st.write(f"RGB colors assigned to 0-value pixels: {unique_zero_colors}")
-                    
-                    # Check if any are not white
-                    non_white_zeros = ~np.all(zero_rgb == [255, 255, 255], axis=1)
-                    if np.sum(non_white_zeros) > 0:
-                        st.write(f"ERROR: {np.sum(non_white_zeros)} zero-value pixels are NOT white!")
-                        problem_colors = zero_rgb[non_white_zeros]
-                        st.write(f"Problem colors: {np.unique(problem_colors.reshape(-1, 3), axis=0)}")
-                    else:
-                        st.write("✓ All zero-value pixels are correctly white")
-
-                # Double-check: explicitly force 0 and NoData pixels to white
-                rgb[band == 0] = [255, 255, 255]
-                rgb[band == -2147483648] = [255, 255, 255]
-                st.write("✓ Explicitly set all 0 and NoData pixels to white")
-
-                # Add this after the RGB processing debug
-                st.write("\n=== RESOLUTION AND SCALE ANALYSIS ===")
-                st.write(f"Current image dimensions: {band.shape}")
-                st.write(f"Pixel size at 30m resolution: {30}m")
-                st.write(f"Total area covered: {band.shape[0] * 30 / 1000:.1f}km x {band.shape[1] * 30 / 1000:.1f}km")
-
-                # Calculate FAA feature sizes
-                faa_mask = (band == 6)
-                if np.sum(faa_mask) > 0:
-                    # Find connected FAA components to see their sizes
-                    from scipy.ndimage import label
-                    try:
-                        labeled_faa, num_features = label(faa_mask)
-                        feature_sizes = []
-                        for i in range(1, num_features + 1):
-                            size = np.sum(labeled_faa == i)
-                            feature_sizes.append(size)
-                        
-                        small_features = sum(1 for size in feature_sizes if size <= 10)  # <= 10 pixels
-                        st.write(f"FAA features: {num_features} total")
-                        st.write(f"Small FAA features (<=10 pixels): {small_features}")
-                        st.write(f"Average FAA feature size: {np.mean(feature_sizes):.1f} pixels")
-                        
-                        if small_features / num_features > 0.7:
-                            st.write("⚠️ Most FAA features are very small - likely processing artifacts or wrong resolution")
-                    except:
-                        st.write("Could not analyze FAA feature sizes")
-
-                # Also check what the reference data should look like
-                st.write("\nCompare this with your reference image - are the yellow lines:")
-                st.write("1. Legitimate narrow FAA properties (airports, runways)?")
-                st.write("2. At boundaries between other land types?") 
-                st.write("3. Appearing as single-pixel lines?")
-
                 # Rest of your plotting code remains the same
                 proj = ccrs.epsg(3338)
                 extent = [x0, x1, y0, y1]
