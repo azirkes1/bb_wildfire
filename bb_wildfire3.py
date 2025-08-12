@@ -640,7 +640,7 @@ with st.container():
             image,
             text,
             font_path=None,
-            font_size=20,
+            font_size=30,
             side_padding=40,
             top_padding=0,
             bottom_padding=0,
