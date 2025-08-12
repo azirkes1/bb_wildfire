@@ -541,21 +541,25 @@ with st.container():
         
         #function to build scalebar
         def add_scalebar_from_ax_extent(ax, location='lower left'):
-
-            # get ax extent and use it to set the length of scalebar
+            
+            # Get ax extent and use it to set the length of scalebar
             xmin, xmax = ax.get_xlim()
             map_width_m = abs(xmax - xmin)
             scalebar_length = map_width_m / 3
 
-            # set scalebar properties
+            # Set scalebar properties
             scalebar = ScaleBar(
-                dx=1,                  # The length of one unit on the scalebar
-                units='miles',         # Tell the library to use 'miles' for the unit
-                length_fraction=scalebar_length / map_width_m,
+                dx=1,               # Base value is 1 unit of the map's CRS (meters)
+                units='m',          # Use a supported unit for internal calculations
                 location=location,
                 box_alpha=0.7,
                 color='black',
-                font_properties="Arial"
+                font_properties="Arial",
+                scale_loc='bottom',
+                label_loc='bottom',
+                length_fraction=scalebar_length / map_width_m,
+                scale_factor=1609.344,  # Conversion factor for meters to miles
+                label='miles'
             )
             ax.add_artist(scalebar)
 
