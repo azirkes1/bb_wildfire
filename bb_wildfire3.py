@@ -803,6 +803,9 @@ with st.container():
         zip_bytes = response.content
         original_tif = extract_tif_from_zip(zip_bytes)
 
+        # Assign directly — no reprojection
+        tif_bytes = original_tif
+
         # Pull colors and labels from layer recipe 
         cmap = layer_recipe["colors"]
         labels = layer_recipe["labels"]
