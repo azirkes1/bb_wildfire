@@ -930,7 +930,30 @@ with st.container():
                         
                     # Debug info
                     print(f"Class {k}: {np.sum(class_pixels)} pixels")
-                    
+                    print("\n=== RGB PROCESSING DEBUG ===")
+                    for k, color in cmap.items():
+                        class_pixels = valid_data_mask & (band == k)
+                        print(f"Class {k} ({labels.get(k, 'Unknown')}): {np.sum(class_pixels)} pixels -> color {color}")
+
+                    print(f"\nZero-value pixels: {np.sum(band == 0)} (these should stay white)")
+                    print(f"NoData pixels (-2147483648): {np.sum(band == -2147483648)}")
+                    print(f"Valid data pixels: {np.sum(valid_data_mask)}")
+                    print(f"Total pixels: {band.size}")
+
+                    # Check if any 0-value pixels are accidentally getting colored
+                    zero_pixels_mask = (band == 0)
+                    if np.sum(zero_pixels_mask) > 0:
+                        # Check what colors the zero pixels have in the final RGB
+                        zero_rgb = rgb[zero_pixels_mask]
+                        unique_zero_colors = np.unique(zero_rgb.reshape(-1, 3), axis=0)
+                        print(f"RGB colors assigned to 0-value pixels: {unique_zero_colors}")
+                        
+                        # Check if any are not white
+                        non_white_zeros = ~np.all(zero_rgb == [255, 255, 255], axis=1)
+                        if np.sum(non_white_zeros) > 0:
+                            print(f"ERROR: {np.sum(non_white_zeros)} zero-value pixels are NOT white!")
+                            problem_colors = zero_rgb[non_white_zeros]
+                            print(f"Problem colors: {np.unique(problem_colors.reshape(-1, 3), axis=0)}")
                     # Additional debug - check what's happening with 0 values
                     zero_pixels = (band == 0)
                     print(f"Zero-value pixels: {np.sum(zero_pixels)} (these should stay white)")
