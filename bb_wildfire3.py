@@ -175,7 +175,7 @@ with st.container():
 
             "Wildfire Jurisdiction": {
             "Title": "Wildfire Jurisdiction",
-            "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/jurisdiction').select('b1'),
+            "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/jurisdic_rep6').select('b1'),
             "colors": {
                 1: (165, 0, 38), #USFWS
                 2: (215, 48, 39), #BLM
