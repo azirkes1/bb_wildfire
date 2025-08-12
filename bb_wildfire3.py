@@ -790,6 +790,11 @@ with st.container():
         img_ee = classified_img.updateMask(pixel_mask) \
             .unmask(-9999) \
             .setDefaultProjection('EPSG:3338', None, 30)
+        
+        test_val = ee.Image(layer_recipe["ee_image"]) \
+            .sample(region=roi.centroid(), scale=30) \
+            .first()
+        st.write(test_val.getInfo())
 
         # Generate download URL — no reprojection in Python
         tiff_url = img_ee.getDownloadURL({
