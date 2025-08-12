@@ -788,8 +788,9 @@ with st.container():
             .setDefaultProjection(native_crs, None, abs(native_transform[0]))
         
         # Generate download URL WITHOUT reprojection (no 'crs' parameter)
+        pixel_size = abs(native_proj['transform'][0])
         tiff_url = img_ee.getDownloadURL({
-            'scale': native_proj['scale'],
+            'scale': pixel_size,
             'region': roi.getInfo()['coordinates'],
             'filePerBand': False
         })
