@@ -776,26 +776,27 @@ with st.container():
             Returns:
                 np.ndarray: The filtered raster data.
             """
-            # Define a function to find the majority value in a neighborhood
+            nodata_value = -2147483648  # Define your NoData value here
+
             def majority(window):
-                # Flatten the window and get the unique values and their counts
-                unique_values, counts = np.unique(window, return_counts=True)
+                # Create a boolean mask to identify valid data pixels (not NoData)
+                valid_mask = window != nodata_value
                 
-                # Exclude NoData values from the majority count
-                # Assuming -2147483648 is a NoData value. Adjust as needed.
-                nodata_mask = unique_values != -2147483648
-                unique_values = unique_values[nodata_mask]
-                counts = counts[nodata_mask]
-                
-                if unique_values.size > 0:
-                    # Return the value with the highest count
-                    return unique_values[np.argmax(counts)]
-                else:
-                    # If all pixels are NoData, return a NoData value
-                    return -2147483648
+                # If there is no valid data in the window, return NoData
+                if not np.any(valid_mask):
+                    return nodata_value
                     
+                # Get unique values and counts for only the valid pixels
+                valid_pixels = window[valid_mask]
+                unique_values, counts = np.unique(valid_pixels, return_counts=True)
+                
+                # Return the most frequent valid value
+                return unique_values[np.argmax(counts)]
+
             # Apply the generic_filter with the majority function
-            return generic_filter(data, majority, size=size)
+            # The `mode='constant'` and `cval=nodata_value` parameters
+            # ensure that the filter correctly handles the edges
+            return generic_filter(data, majority, size=size, mode='constant', cval=nodata_value)
 
     
         # ---------------------------------------------------------
