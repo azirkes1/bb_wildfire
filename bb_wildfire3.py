@@ -551,15 +551,13 @@ with st.container():
             scalebar = ScaleBar(
                 dx=1,               # Base value is 1 unit of the map's CRS (meters)
                 units='m',          # Use a supported unit for internal calculations
+                length_fraction=scalebar_length / map_width_m,
                 location=location,
                 box_alpha=0.7,
                 color='black',
                 font_properties="Arial",
-                scale_loc='bottom',
-                label_loc='bottom',
-                length_fraction=scalebar_length / map_width_m,
-                scale_factor=1609.344,  # Conversion factor for meters to miles
-                label='miles'
+                # Use scale_formatter to convert meters to miles
+                scale_formatter=lambda value, unit: f"{value / 1609.344:.0f} miles",
             )
             ax.add_artist(scalebar)
 
