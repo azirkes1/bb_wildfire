@@ -772,20 +772,26 @@ with st.container():
         #  back to main img function - extracting TIF data
         # ---------------------------------------------------------
         
-        # Get classified image
-        classified = ee.Image(layer_recipe["ee_image"]).toInt()
+        # Extract just the selected layer's recipe
+        layer_recipe = recipe[layer_name]
 
-        # Create pixel-aligned mask from ROI
-        mask = ee.Image.constant(1).toInt() \
+        # Create metadata text file
+        txt_bytes = generate_text_metadata_file(recipe, layer_name)
+
+        # Get the classified image as int
+        classified_img = ee.Image(layer_recipe["ee_image"]).toInt()
+
+        # Create a hard pixel mask from the ROI that matches the image's native projection
+        pixel_mask = ee.Image.constant(1).toInt() \
             .clip(roi) \
-            .reproject(classified.projection())
+            .reproject(classified_img.projection())
 
-        # Apply mask before clipping
-        img_ee = classified.updateMask(mask) \
+        # Apply the mask BEFORE clipping to avoid fractional pixels being resampled
+        img_ee = classified_img.updateMask(pixel_mask) \
             .unmask(-9999) \
             .setDefaultProjection('EPSG:3338', None, 30)
 
-        # Generate download URL — no reprojection happens now
+        # Generate download URL — no reprojection in Python
         tiff_url = img_ee.getDownloadURL({
             'scale': 30,
             'crs': 'EPSG:3338',
@@ -793,12 +799,12 @@ with st.container():
             'filePerBand': False
         })
 
-        # Send HTTP GET request and return ZIP file
+        # Download ZIP and extract TIFF
         response = requests.get(tiff_url)
         zip_bytes = response.content
         original_tif = extract_tif_from_zip(zip_bytes)
 
-        # Assign directly — no reprojection in Python
+        # No reprojection — just assign
         tif_bytes = original_tif
 
         # Pull colors and labels from layer recipe 
