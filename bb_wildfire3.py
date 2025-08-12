@@ -545,25 +545,17 @@ with st.container():
             # Get ax extent and use it to set the length of scalebar
             xmin, xmax = ax.get_xlim()
             map_width_m = abs(xmax - xmin)
-            scalebar_length = map_width_m / 3
+            scalebar_length = map_width_m / 3  
 
-            # Set scalebar properties
+            # Set scalebar properties for miles
             scalebar = ScaleBar(
-                dx=1000,               # Set dx to 1000 meters (1 km)
-                units='m',             # Use meters for internal calculations
+                dx=1,  # 1 meter per unit in your coordinate system
+                units='mi',  # Changed to miles
                 length_fraction=scalebar_length / map_width_m,
                 location=location,
                 box_alpha=0.7,
                 color='black',
-                font_properties="Arial",
-                scale_formatter=lambda value, unit: (
-                    # Convert to miles for values greater than one mile
-                    f"{value / 1609.344:.0f} miles"
-                    if value >= 1609.344
-                    # Convert to kilometers for values between one km and one mile
-                    elif value >= 1000
-                    else f"{value:.0f} meters" # Default to meters for smaller values
-                ),
+                font_properties="Arial"
             )
             ax.add_artist(scalebar)
 
