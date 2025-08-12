@@ -888,85 +888,71 @@ with st.container():
             layout = "square"  #square → default
 
         # ---------------------------------------------------------
-        #  reproject tif 
-        # ---------------------------------------------------------
+#   reproject tif
+# ---------------------------------------------------------
+with MemoryFile(io.BytesIO(original_tif)) as mem:
+    with mem.open() as src:
+        band_data = src.read(1)
+        width = src.width
+        height = src.height
+        dtype = src.dtypes[0]
+        count = src.count
+        profile = src.profile.copy()
 
-        #wraps tif_bytes into in-memory file
-        with MemoryFile(io.BytesIO(original_tif)) as mem: 
-            #opens tif file and reads it 
-            with mem.open() as src:
-                
-                band_data = src.read(1)
-                width = src.width
-                height = src.height
-                dtype = src.dtypes[0]
-                count = src.count
-                profile = src.profile.copy()
+        st.write("STEP 2 - Before reprojection:")
+        st.write("  Unique values:", sorted(np.unique(band_data)))
+        st.write("  Shape:", band_data.shape)
 
-                st.write("STEP 2 - Before reprojection:")
-                st.write("  Unique values:", sorted(np.unique(band_data)))
-                st.write("  Shape:", band_data.shape)
+        lonlat_coords = geometry['coordinates'][0]
+        lons, lats = zip(*lonlat_coords)
+        xmin, xmax = min(lons), max(lons)
+        ymin, ymax = min(lats), max(lats)
 
-                #gets bounding box from geometry 
-                lonlat_coords = geometry['coordinates'][0]
-                lons, lats = zip(*lonlat_coords)
-                xmin, xmax = min(lons), max(lons)
-                ymin, ymax = min(lats), max(lats)
+        transformer = Transformer.from_crs("EPSG:4326", "EPSG:3338", always_xy=True)
+        x0, y0 = transformer.transform(xmin, ymin)
+        x1, y1 = transformer.transform(xmax, ymax)
 
-                #reprojects bounding box from EPSG:4326 to to EPSG:3338 and 
-                transformer = Transformer.from_crs("EPSG:4326", "EPSG:3338", always_xy=True)
-                x0, y0 = transformer.transform(xmin, ymin)
-                x1, y1 = transformer.transform(xmax, ymax)
+        dst_crs = CRS.from_epsg(3338)
+        transform, width, height = calculate_default_transform(
+            src.crs, dst_crs, src.width, src.height, *src.bounds
+        )
 
-                #define raster transform and crs
-                dst_crs = CRS.from_epsg(3338)
-                transform, width, height = calculate_default_transform(
-                    src.crs, dst_crs, src.width, src.height, *src.bounds
-                )
+        profile.update({
+            'driver': 'GTiff',
+            'height': height,
+            'width': width,
+            'count': count,
+            'dtype': dtype,
+            'crs': dst_crs,
+            'transform': transform,
+        })
 
-                #update the profile with CRS and transform
-                profile.update({
-                    'driver': 'GTiff',
-                    'height': height,
-                    'width': width,
-                    'count': count,
-                    'dtype': dtype,
-                    'crs': dst_crs,
-                    'transform': transform,
-                })
+        destination = np.empty((height, width), dtype=src.dtypes[0])
 
-                #create empty destination array
-                destination = np.empty((height, width), dtype=src.dtypes[0])
+        st.write("STEP 3 - Empty destination array:")
+        st.write("  Unique values:", sorted(np.unique(destination)))
+        st.write("  Min/Max:", destination.min(), destination.max())
+        
+        # Reproject using mode resampling for categorical data
+        reproject(
+            source=src.read(1),
+            destination=destination,
+            src_transform=src.transform,
+            src_crs=src.crs,
+            dst_transform=transform,
+            dst_crs=dst_crs,
+            resampling=Resampling.mode
+        )
 
-                st.write("STEP 3 - Empty destination array:")
-                st.write("  Unique values:", sorted(np.unique(destination)))
-                st.write("  Min/Max:", destination.min(), destination.max())
-                
-                #reproject
-                reproject(
-                    source=src.read(1),
-                    destination=destination,
-                    src_transform=src.transform,
-                    src_crs=src.crs,
-                    dst_transform=transform,
-                    dst_crs=dst_crs,
-                    resampling=Resampling.mode  # Changed from nearest to mode
-                )
-                
-                st.write("STEP 4 - After reprojection:")
-                st.write("  Unique values:", sorted(np.unique(destination)))
+        st.write("STEP 4 - After reprojection with mode resampling:")
+        st.write("  Unique values:", sorted(np.unique(destination)))
+        
+        # Write the REPROJECTED data directly
+        fixed_memfile = MemoryFile()
+        with fixed_memfile.open(**profile) as dst:
+            dst.write(destination, 1)
 
-                # STEP 4.5 - Clean up edge artifacts using majority filter
-                st.write("STEP 4.5 - Applying majority filter to clean edges:")
-                cleaned_destination = apply_majority_filter(destination)
-                st.write("  Unique values after cleaning:", sorted(np.unique(cleaned_destination)))
-                
-                # Write the CLEANED REPROJECTED data
-                fixed_memfile = MemoryFile()
-                with fixed_memfile.open(**profile) as dst:
-                    dst.write(cleaned_destination, 1)
-
-                tif_bytes = fixed_memfile.read()
+        tif_bytes = fixed_memfile.read()
 
         # ---------------------------------------------------------
         #  create main pdf map 
