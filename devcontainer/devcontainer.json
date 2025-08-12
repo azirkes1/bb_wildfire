@@ -1,0 +1,21 @@
+{
+    // Use the official Dev Containers Python 3.10 image.
+    "image": "mcr.microsoft.com/devcontainers/python:3.10",
+
+    // Configure the environment to automatically install your dependencies.
+    // This command runs after the container is created.
+    "postCreateCommand": "pip install --no-cache-dir -r requirements.txt",
+
+    // Forward the Streamlit port (8501) so you can view the app in your browser.
+    "forwardPorts": [8501],
+
+    // Recommended extensions for a better Python development experience in Codespaces.
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance"
+            ]
+        }
+    }
+}
