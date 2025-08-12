@@ -783,9 +783,10 @@ with st.container():
         # Create hard pixel mask clipped to ROI in native projection
         pixel_mask = ee.Image.constant(1).toInt().clip(roi).reproject(classified_img.projection())
 
-        # Apply mask BEFORE clipping to avoid fractional pixels resampled in EE
-        img_ee = classified_img.updateMask(pixel_mask).unmask(-9999).setDefaultProjection(native_crs, None, native_proj['scale'])
-
+        img_ee = classified_img.updateMask(pixel_mask) \
+            .unmask(-9999) \
+            .setDefaultProjection(native_crs, None, abs(native_transform[0]))
+        
         # Generate download URL WITHOUT reprojection (no 'crs' parameter)
         tiff_url = img_ee.getDownloadURL({
             'scale': native_proj['scale'],
