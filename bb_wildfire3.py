@@ -1031,6 +1031,40 @@ with st.container():
                 rgb[band == -2147483648] = [255, 255, 255]
                 st.write("✓ Explicitly set all 0 and NoData pixels to white")
 
+                # Add this after the RGB processing debug
+                st.write("\n=== RESOLUTION AND SCALE ANALYSIS ===")
+                st.write(f"Current image dimensions: {band.shape}")
+                st.write(f"Pixel size at 30m resolution: {30}m")
+                st.write(f"Total area covered: {band.shape[0] * 30 / 1000:.1f}km x {band.shape[1] * 30 / 1000:.1f}km")
+
+                # Calculate FAA feature sizes
+                faa_mask = (band == 6)
+                if np.sum(faa_mask) > 0:
+                    # Find connected FAA components to see their sizes
+                    from scipy.ndimage import label
+                    try:
+                        labeled_faa, num_features = label(faa_mask)
+                        feature_sizes = []
+                        for i in range(1, num_features + 1):
+                            size = np.sum(labeled_faa == i)
+                            feature_sizes.append(size)
+                        
+                        small_features = sum(1 for size in feature_sizes if size <= 10)  # <= 10 pixels
+                        st.write(f"FAA features: {num_features} total")
+                        st.write(f"Small FAA features (<=10 pixels): {small_features}")
+                        st.write(f"Average FAA feature size: {np.mean(feature_sizes):.1f} pixels")
+                        
+                        if small_features / num_features > 0.7:
+                            st.write("⚠️ Most FAA features are very small - likely processing artifacts or wrong resolution")
+                    except:
+                        st.write("Could not analyze FAA feature sizes")
+
+                # Also check what the reference data should look like
+                st.write("\nCompare this with your reference image - are the yellow lines:")
+                st.write("1. Legitimate narrow FAA properties (airports, runways)?")
+                st.write("2. At boundaries between other land types?") 
+                st.write("3. Appearing as single-pixel lines?")
+
                 # Rest of your plotting code remains the same
                 proj = ccrs.epsg(3338)
                 extent = [x0, x1, y0, y1]
