@@ -169,51 +169,70 @@ with st.container():
                 
             },
 
-            "Fire Return Interval": {
-                "Title": "LANDFIRE Fire Return Interval",
-                "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/fri_repro').select('b1'),
-                "colors": {
-                    1: (255, 255, 255), #No data
-                    2: (234, 89, 58), # 100–149 years
-                    3: (253, 191, 111), # 150–199 years
-                    4: (183, 224, 117), # 200–299 years
-                    5: (77, 177, 93), # 300–499 years 
-                    6: (77, 177, 93), # 500–999 years
-                    7: (0, 104, 55) # 500–999 years
-                },
-
-                "labels": {
-                    # No Data
-                    1: 'No Data', 
-                    2: '100–149 years', 
-                    3: '150–199 years', 
-                    4: '200–299 years',
-                    5: '300–499 years',
-                    6: '500–999 years',
-                    7: '1000+ years'
-                },
-
-                "credits": "Data source: LANDFIRE, 2023, Fire Return Interval,"
-                "LANDFIRE 2.0.0, U.S. Department of the Interior, Geological Survey, "
-                "and U.S. Department of Agriculture. Accessed 01 April 2025 at http://www.landfire/viewer."  
+            "Wildfire Jurisdiction": {
+            "Title": "Wildfire Jurisdiction",
+            "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/jurisdiction').select('b1'),
+            "colors": {
+                1: (165, 0, 38), #USFWS
+                2: (215, 48, 39), #BLM
+                3: (244, 109, 67), #BIA
+                4: (253, 174, 97), #AK DNR
+                5: (254, 224, 139), #NPS
+                6: (255, 255, 191), #FAA
+                7: (217, 239, 139), #AK DNR - Div. Parks
+                8: (166, 217, 106), #ANCSA Village/AFS
+                9: (102, 189, 99), #AK DOT
+                10: (26, 152, 80), #ANCSA Regional/AFS
+                11: (0, 104, 55), #Bourough/AKDNR
+                12: (54, 144, 192), #Air Force
+                13: (5, 112, 176), #Army
+                14: (8, 64, 129), #uSPS
+                15: (8, 29, 88), #AK Dept. Fish & Game
+                16: (37, 52, 148) #City/AK DNR
             },
 
-            "Flammability Hazard": {
-                "Title": "Flammability Hazard",
-                "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/haz_repro_rec').select('b1'),
-                "colors": {
-                    0: (189, 190, 190), 1: (101, 171, 20), 2: (196, 227, 29), 3: (249, 223, 26), 
-                    4: (255, 154, 11), 5: (252, 59, 9)
-                },
-                "labels": {
-                    0: "No data", 1: "Very Low", 2: "Low", 3: "Moderate",
-                    4: "High", 5: "Extreme"
-                },
-                "credits": "Data Source: Schmidt, Jennifer. 2025. "
-                        "“Wildfire Exposure Assessment and Structure Risk.” "
-                        "Alaska Natural Resource Management. Accessed April 01, 2025. "
-                        "https://alaskanrm.com/wildfire-exposure/."
-            }}
+            "labels": {
+                1: 'USFWS', 
+                2: 'BLM', 
+                3: 'BIA', 
+                4: 'AK DNR',
+                5: 'NPS',
+                6: 'FAA',
+                7: 'AK DNR - Div. Parks',
+                8: 'ANCSA Village/AFS',
+                9: 'AK DOT',
+                10: 'ANCSA Regional/AFS',
+                11: 'Bourough/AKDNR',
+                12: 'Air Force', 
+                13: 'Army', 
+                14: 'USPS', 
+                15: 'AK Dept. Fish & Game', 
+                16: 'City/AK DNR'
+            },
+
+            "credits": "Data source: U.S. Department of the Interior, "
+            "Bureau of Land Management, Alaska Fire Service."
+            "Alaska Wildland Fire Jurisdictions (AKWFJ). "
+            "Last modified March 3, 2023. ArcGIS Online. "
+            "https://www.arcgis.com/home/item.html?\n"
+            "id=1091963729c54d3386b5e60995da6fff." 
+        },
+        "Flammability Hazard": {
+            "Title": "Flammability Hazard",
+            "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/haz_repro_rec').select('b1'),
+            "colors": {
+                0: (189, 190, 190), 1: (101, 171, 20), 2: (196, 227, 29), 3: (249, 223, 26), 
+                4: (255, 154, 11), 5: (252, 59, 9)
+            },
+            "labels": {
+                0: "No data", 1: "Very Low", 2: "Low", 3: "Moderate",
+                4: "High", 5: "Extreme"
+            },
+            "credits": "Data Source: Schmidt, Jennifer. 2025. "
+                    "“Wildfire Exposure Assessment and Structure Risk.” "
+                    "Alaska Natural Resource Management. Accessed April 01, 2025. "
+                    "https://alaskanrm.com/wildfire-exposure/."
+        }}
     
     # ---------------------------------------------------------
     #  add elements to app
