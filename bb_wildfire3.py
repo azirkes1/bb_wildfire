@@ -763,7 +763,47 @@ with st.container():
                     if name.endswith(".tif") or name.endswith(".tiff"):
                         return zf.read(name)
                 raise ValueError("No .tif file found in the ZIP archive.")
-
+            
+        def apply_majority_filter(data, window_size=3):
+            """
+            Apply a majority filter to remove isolated pixels and edge artifacts.
+            For each pixel, replace it with the most common value in its neighborhood.
+            """
+            from collections import Counter
+            
+            # Pad the array to handle edges
+            pad_size = window_size // 2
+            padded = np.pad(data, pad_size, mode='edge')
+            result = data.copy()
+            
+            # Apply majority filter
+            for i in range(data.shape[0]):
+                for j in range(data.shape[1]):
+                    # Extract neighborhood window
+                    window = padded[i:i+window_size, j:j+window_size]
+                    
+                    # Only process if current pixel might be an artifact
+                    current_val = data[i, j]
+                    
+                    # Skip NoData values
+                    if current_val in [-2147483648, 0]:
+                        continue
+                        
+                    # Get valid neighbors (exclude NoData)
+                    valid_neighbors = window[(window != -2147483648) & (window != 0)]
+                    
+                    if len(valid_neighbors) > 0:
+                        # Count occurrences of each value
+                        counts = Counter(valid_neighbors.flatten())
+                        most_common_val, most_common_count = counts.most_common(1)[0]
+                        
+                        # If current value is rare in neighborhood, replace it
+                        current_count = counts.get(current_val, 0)
+                        if current_count == 1 and most_common_count >= 3:
+                            result[i, j] = most_common_val
+            
+            return result
+    
         # ---------------------------------------------------------
         #  back to main img function - extracting TIF data
         # ---------------------------------------------------------
@@ -813,7 +853,7 @@ with st.container():
         # ---------------------------------------------------------
         #  reproject tif 
         # ---------------------------------------------------------
-        
+
         #wraps tif_bytes into in-memory file
         with MemoryFile(io.BytesIO(original_tif)) as mem: 
             #opens tif file and reads it 
@@ -879,10 +919,15 @@ with st.container():
                 st.write("STEP 4 - After reprojection:")
                 st.write("  Unique values:", sorted(np.unique(destination)))
 
-                # Write the REPROJECTED data (destination), not the original (band_data)
+                # STEP 4.5 - Clean up edge artifacts using majority filter
+                st.write("STEP 4.5 - Applying majority filter to clean edges:")
+                cleaned_destination = apply_majority_filter(destination)
+                st.write("  Unique values after cleaning:", sorted(np.unique(cleaned_destination)))
+                
+                # Write the CLEANED REPROJECTED data
                 fixed_memfile = MemoryFile()
                 with fixed_memfile.open(**profile) as dst:
-                    dst.write(destination, 1)  # CRITICAL FIX: Use 'destination' not 'band_data'
+                    dst.write(cleaned_destination, 1)
 
                 tif_bytes = fixed_memfile.read()
 
