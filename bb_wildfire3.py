@@ -890,36 +890,49 @@ with st.container():
             # ---------------------------------------------------------
             #  create main pdf map 
             # ---------------------------------------------------------
-            with MemoryFile(io.BytesIO(tif_bytes)) as mem:
+           with MemoryFile(io.BytesIO(tif_bytes)) as mem:
                 with mem.open() as src:
                 
-                    #read the band and create a mask for nodata values
+                    # --- create main map ---
                     band = src.read(1)
-                    nodata_values = [src.nodata, -2147483648, 0] if src.nodata else [-2147483648, 0]
-                    # Mask both the official NoData and any 0 values that shouldn't exist
-                    masked_band = np.ma.masked_equal(band, nodata)
-                    masked_band = np.ma.masked_equal(masked_band, 0)  # Also mask any 0s
-                    masked_band = np.ma.masked_equal(masked_band, -2147483648)  # And the int32 min value
-
-                    st.write("Unique values in band:", np.unique(band))
-                    st.write("NoData value:", nodata)
-                    st.write("Values at edges - first/last rows:")
-                    st.write("Top edge:", np.unique(band[0:2, :]))
-                    st.write("Bottom edge:", np.unique(band[-2:, :]))
-                    st.write("Left edge:", np.unique(band[:, 0:2]))
-                    st.write("Right edge:", np.unique(band[:, -2:]))
                     
-                    masked_band = np.ma.masked_equal(band, nodata) #create mask that excludes nodata
-                    #convert raster to RGB image 
+                    # DIAGNOSTIC (can remove later)
+                    print("STEP 5 - Final band for visualization:")
+                    print("  Unique values:", sorted(np.unique(band)))
+                    print("  NoData value:", src.nodata)
+                    
+                    # Handle multiple NoData values properly
+                    # Both -2147483648 and 0 should be treated as NoData
+                    nodata_values = [-2147483648, 0]
+                    if src.nodata is not None:
+                        nodata_values.append(src.nodata)
+                    
+                    # Start with the band data
+                    masked_band = band.copy().astype(float)  # Convert to float to handle masking better
+                    
+                    # Mask all NoData values
+                    for nodata_val in nodata_values:
+                        masked_band = np.ma.masked_equal(masked_band, nodata_val)
+                    
+                    print("After masking - unique values:", sorted(np.unique(masked_band.compressed())))
+                    
+                    # Convert raster to RGB image 
                     rgb = np.ones((masked_band.shape[0], masked_band.shape[1], 3), dtype=np.uint8) * 255
+                    
+                    # Apply colors only to non-masked pixels
                     for k, color in cmap.items():
-                        rgb[masked_band == k] = color
+                        if hasattr(masked_band, 'mask'):
+                            # Handle masked array
+                            valid_pixels = ~masked_band.mask & (masked_band == k)
+                        else:
+                            # Handle regular array
+                            valid_pixels = (masked_band == k)
+                        rgb[valid_pixels] = color
 
-                    #set projection and extent 
+                    # Rest of your plotting code remains the same
                     proj = ccrs.epsg(3338)
                     extent = [x0, x1, y0, y1]
 
-                    #set figure size based on layout 
                     if layout == "vertical":
                         fig_size = (8, 11)
                     elif layout == "horizontal":
@@ -927,14 +940,12 @@ with st.container():
                     else:
                         fig_size = (10, 10)
 
-                    #plot the image
-                    fig, ax = plt.subplots(figsize=fig_size, subplot_kw={'projection': proj}) #create figure
-                    ax.imshow(rgb, origin='upper', extent=extent) #render image
-                    ax.set_extent(extent, crs=proj) #set axis extent 
-                    ax.set_title(f"{layer_name} Map", fontsize=18) #create title 
+                    fig, ax = plt.subplots(figsize=fig_size, subplot_kw={'projection': proj})
+                    ax.imshow(rgb, origin='upper', extent=extent)
+                    ax.set_extent(extent, crs=proj)
+                    ax.set_title(f"{layer_name} Map", fontsize=18)
                     ax.set_aspect('equal')
 
-                    #add lat/lon gridlines in degrees
                     gl = ax.gridlines(
                         crs=ccrs.PlateCarree(),
                         draw_labels=True,
@@ -944,21 +955,17 @@ with st.container():
                         linestyle='--'
                     )
 
-                    #hide labels on top right
                     gl.top_labels = False 
                     gl.right_labels = False 
 
-                    #set font size for x and y axis labels
                     gl.xlabel_style = {'size': 10}
                     gl.ylabel_style = {'size': 10}
 
-                    #estimate image width in pixels
                     width = src.width
                     height = src.height
 
                     add_scalebar_from_ax_extent(ax)
-                                        
-                    #saves figure as PNG in memory and loads it as a PIL image
+                                            
                     buf = io.BytesIO()
                     plt.savefig(buf, format='png', bbox_inches='tight', dpi=150)
                     plt.close(fig)
