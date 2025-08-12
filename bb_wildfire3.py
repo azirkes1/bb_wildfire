@@ -263,10 +263,10 @@ with st.container():
             white-space: normal;
             word-wrap: break-word;
             margin-bottom: 15px;'>
-                Ownership - 
-                Land cover - 
-                Wildfire Jurisdiction - 
-                Flammability Hazard - 
+                Ownership - Bureau of Land Management<br>
+                Land cover - National Land Cover Database<br>
+                Wildfire Jurisdiction - Bureau of Land Management<br>
+                Flammability Hazard - University of Alaska - Anchorage<br>
 
             </div>
             """,
