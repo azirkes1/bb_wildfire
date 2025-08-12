@@ -835,6 +835,43 @@ with st.container():
         zip_bytes = response.content
         original_tif = extract_tif_from_zip(zip_bytes)
 
+        # DIAGNOSTIC: Check if artifacts exist in original GEE data
+        with MemoryFile(io.BytesIO(original_tif)) as mem:
+            with mem.open() as src:
+                original_band = src.read(1)
+                st.write("=== ORIGINAL GEE DATA ANALYSIS ===")
+                st.write("Unique values:", sorted(np.unique(original_band)))
+                
+                # Check for suspicious FAA patterns in original data
+                faa_pixels = (original_band == 6)
+                st.write(f"FAA pixels in original: {np.sum(faa_pixels)}")
+                
+                # Check if FAA pixels are isolated (likely artifacts)
+                if np.sum(faa_pixels) > 0:
+                    # Simple isolation check
+                    isolated_faa = 0
+                    faa_locations = np.where(faa_pixels)
+                    
+                    for idx in range(min(100, len(faa_locations[0]))):  # Check first 100 FAA pixels
+                        i, j = faa_locations[0][idx], faa_locations[1][idx]
+                        
+                        # Check 3x3 neighborhood
+                        i_start, i_end = max(0, i-1), min(original_band.shape[0], i+2)
+                        j_start, j_end = max(0, j-1), min(original_band.shape[1], j+2)
+                        neighborhood = original_band[i_start:i_end, j_start:j_end]
+                        
+                        # Count non-FAA neighbors
+                        non_faa_neighbors = np.sum((neighborhood != 6) & (neighborhood != 0) & (neighborhood != -2147483648))
+                        faa_neighbors = np.sum(neighborhood == 6) - 1  # Exclude self
+                        
+                        if non_faa_neighbors >= 4 and faa_neighbors == 0:
+                            isolated_faa += 1
+                    
+                    st.write(f"Isolated FAA pixels in original (likely artifacts): {isolated_faa}")
+                    
+                    if isolated_faa > 50:
+                        st.write("⚠️ Many isolated FAA pixels detected in ORIGINAL GEE data!")
+                        st.write("The artifacts are coming from Google Earth Engine, not your processing.")
         #pull colors and labels from layer recipe 
         cmap = layer_recipe["colors"]
         labels = layer_recipe["labels"]
