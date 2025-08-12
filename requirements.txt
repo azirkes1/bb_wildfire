@@ -14,7 +14,4 @@ tifffile
 shapely
 pyproj
 cartopy
-pyproj
-shapely
-requests
 matplotlib-scalebar
