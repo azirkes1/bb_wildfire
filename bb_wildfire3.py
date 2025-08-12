@@ -549,9 +549,8 @@ with st.container():
 
             # set scalebar properties
             scalebar = ScaleBar(
-                dx=1,               # Base value is 1
-                units='miles',         # Set base units as miles
-                dimension='miles',  # Tell the library to work with miles
+                dx=1,                  # The length of one unit on the scalebar
+                units='miles',         # Tell the library to use 'miles' for the unit
                 length_fraction=scalebar_length / map_width_m,
                 location=location,
                 box_alpha=0.7,
