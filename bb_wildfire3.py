@@ -818,9 +818,7 @@ with st.container():
         with MemoryFile(io.BytesIO(original_tif)) as mem: 
             #opens tif file and reads it 
             with mem.open() as src:
-
                 
-
                 band_data = src.read(1)
                 width = src.width
                 height = src.height
@@ -849,7 +847,7 @@ with st.container():
                     src.crs, dst_crs, src.width, src.height, *src.bounds
                 )
 
-            #update the profile with CRS and transform
+                #update the profile with CRS and transform
                 profile.update({
                     'driver': 'GTiff',
                     'height': height,
@@ -860,12 +858,13 @@ with st.container():
                     'transform': transform,
                 })
 
-                #create empty base file
+                #create empty destination array
                 destination = np.empty((height, width), dtype=src.dtypes[0])
 
                 st.write("STEP 3 - Empty destination array:")
                 st.write("  Unique values:", sorted(np.unique(destination)))
                 st.write("  Min/Max:", destination.min(), destination.max())
+                
                 #reproject
                 reproject(
                     source=src.read(1),
@@ -874,152 +873,124 @@ with st.container():
                     src_crs=src.crs,
                     dst_transform=transform,
                     dst_crs=dst_crs,
-                    resampling=Resampling.nearest
+                    resampling=Resampling.mode  # Changed from nearest to mode
                 )
+                
                 st.write("STEP 4 - After reprojection:")
                 st.write("  Unique values:", sorted(np.unique(destination)))
 
-                # Write the new raster
+                # Write the REPROJECTED data (destination), not the original (band_data)
                 fixed_memfile = MemoryFile()
                 with fixed_memfile.open(**profile) as dst:
-                    dst.write(band_data, 1)
-
+                    dst.write(destination, 1)  # CRITICAL FIX: Use 'destination' not 'band_data'
 
                 tif_bytes = fixed_memfile.read()
 
-            # ---------------------------------------------------------
-            #  create main pdf map 
-            # ---------------------------------------------------------
-            with MemoryFile(io.BytesIO(tif_bytes)) as mem:
-                with mem.open() as src:
+        # ---------------------------------------------------------
+        #  create main pdf map 
+        # ---------------------------------------------------------
+        with MemoryFile(io.BytesIO(tif_bytes)) as mem:
+            with mem.open() as src:
+            
+                # --- create main map ---
+                band = src.read(1)
                 
-                    # --- create main map ---
-                    band = src.read(1)
+                st.write("STEP 5 - Final band for visualization:")
+                st.write("  Unique values:", sorted(np.unique(band)))
+                st.write("  NoData value:", src.nodata)
+                
+                # Handle multiple NoData values properly
+                # Both -2147483648 and 0 should be treated as NoData
+                nodata_values = [-2147483648, 0]
+                if src.nodata is not None:
+                    nodata_values.append(src.nodata)
+                
+                # Convert raster to RGB image - start with white background
+                rgb = np.ones((band.shape[0], band.shape[1], 3), dtype=np.uint8) * 255
+                
+                # Create a mask for valid data (exclude NoData values)
+                valid_data_mask = ~np.isin(band, [-2147483648, 0])
+                
+                # Apply colors ONLY to valid pixels with legitimate class values
+                for k, color in cmap.items():
+                    # Only color pixels that are: 1) valid data, 2) match the class value
+                    class_pixels = valid_data_mask & (band == k)
+                    rgb[class_pixels] = color
                     
-                    # DIAGNOSTIC (can remove later)
-                    print("STEP 5 - Final band for visualization:")
-                    print("  Unique values:", sorted(np.unique(band)))
-                    print("  NoData value:", src.nodata)
-                    
-                    # Handle multiple NoData values properly
-                    # Both -2147483648 and 0 should be treated as NoData
-                    nodata_values = [-2147483648, 0]
-                    if src.nodata is not None:
-                        nodata_values.append(src.nodata)
-                    
-                    # Start with the band data
-                    masked_band = band.copy().astype(float)  # Convert to float to handle masking better
-                    
-                    # Mask all NoData values
-                    for nodata_val in nodata_values:
-                        masked_band = np.ma.masked_equal(masked_band, nodata_val)
-                    
-                    print("After masking - unique values:", sorted(np.unique(masked_band.compressed())))
-                    
-                    # Convert raster to RGB image - start with white background
-                    rgb = np.ones((band.shape[0], band.shape[1], 3), dtype=np.uint8) * 255
-                    
-                    # Create a mask for valid data (exclude NoData values)
-                    valid_data_mask = ~np.isin(band, [-2147483648, 0])
-                    
-                    # Apply colors ONLY to valid pixels with legitimate class values
-                    for k, color in cmap.items():
-                        # Only color pixels that are: 1) valid data, 2) match the class value
-                        class_pixels = valid_data_mask & (band == k)
-                        rgb[class_pixels] = color
-                        
-                    st.write(f"\n=== RGB PROCESSING DEBUG ===")
-                    for k, color in cmap.items():
-                        class_pixels = valid_data_mask & (band == k)
-                        st.write(f"Class {k} ({labels.get(k, 'Unknown')}): {np.sum(class_pixels)} pixels -> color {color}")
+                st.write(f"\n=== RGB PROCESSING DEBUG ===")
+                for k, color in cmap.items():
+                    class_pixels = valid_data_mask & (band == k)
+                    st.write(f"Class {k} ({labels.get(k, 'Unknown')}): {np.sum(class_pixels)} pixels -> color {color}")
 
-                    st.write(f"Zero-value pixels: {np.sum(band == 0)} (these should stay white)")
-                    st.write(f"NoData pixels (-2147483648): {np.sum(band == -2147483648)}")
-                    st.write(f"Valid data pixels: {np.sum(valid_data_mask)}")
-                    st.write(f"Total pixels: {band.size}")
+                st.write(f"Zero-value pixels: {np.sum(band == 0)} (these should stay white)")
+                st.write(f"NoData pixels (-2147483648): {np.sum(band == -2147483648)}")
+                st.write(f"Valid data pixels: {np.sum(valid_data_mask)}")
+                st.write(f"Total pixels: {band.size}")
 
-                    # Check if any 0-value pixels are accidentally getting colored
-                    zero_pixels_mask = (band == 0)
-                    if np.sum(zero_pixels_mask) > 0:
-                        # Check what colors the zero pixels have in the final RGB
-                        zero_rgb = rgb[zero_pixels_mask]
-                        unique_zero_colors = np.unique(zero_rgb.reshape(-1, 3), axis=0)
-                        st.write(f"RGB colors assigned to 0-value pixels: {unique_zero_colors}")
-                        
-                        # Check if any are not white
-                        non_white_zeros = ~np.all(zero_rgb == [255, 255, 255], axis=1)
-                        if np.sum(non_white_zeros) > 0:
-                            st.write(f"ERROR: {np.sum(non_white_zeros)} zero-value pixels are NOT white!")
-                            problem_colors = zero_rgb[non_white_zeros]
-                            st.write(f"Problem colors: {np.unique(problem_colors.reshape(-1, 3), axis=0)}")
-                        else:
-                            st.write("✓ All zero-value pixels are correctly white")
-
-                    st.write("\n=== FAA PIXEL ANALYSIS ===")
-                    faa_pixels = (band == 6)
-                    st.write(f"FAA (class 6) pixels: {np.sum(faa_pixels)}")
-
-                    # Check if FAA pixels form thin lines (high edge count relative to area)
-                    if np.sum(faa_pixels) > 0:
-                        # Simple edge detection - count FAA pixels with non-FAA neighbors
-                        from scipy import ndimage
-                        faa_edges = ndimage.binary_erosion(faa_pixels) != faa_pixels
-                        edge_count = np.sum(faa_edges & faa_pixels)
-                        st.write(f"FAA edge pixels: {edge_count}")
-                        st.write(f"FAA edge ratio: {edge_count / np.sum(faa_pixels):.2f}")
-                        
-                        if edge_count / np.sum(faa_pixels) > 0.5:
-                            st.write("⚠️ FAA pixels form mostly thin lines/boundaries")
-                        else:
-                            st.write("✓ FAA pixels form solid areas")
+                # Check if any 0-value pixels are accidentally getting colored
+                zero_pixels_mask = (band == 0)
+                if np.sum(zero_pixels_mask) > 0:
+                    # Check what colors the zero pixels have in the final RGB
+                    zero_rgb = rgb[zero_pixels_mask]
+                    unique_zero_colors = np.unique(zero_rgb.reshape(-1, 3), axis=0)
+                    st.write(f"RGB colors assigned to 0-value pixels: {unique_zero_colors}")
                     
-                    # Double-check: explicitly force 0 and NoData pixels to white
-                    rgb[band == 0] = [255, 255, 255]
-                    rgb[band == -2147483648] = [255, 255, 255]
-                    st.write("✓ Explicitly set all 0 and NoData pixels to white")
-
-                    # Rest of your plotting code remains the same
-                    proj = ccrs.epsg(3338)
-                    extent = [x0, x1, y0, y1]
-
-                    if layout == "vertical":
-                        fig_size = (8, 11)
-                    elif layout == "horizontal":
-                        fig_size = (11, 8)
+                    # Check if any are not white
+                    non_white_zeros = ~np.all(zero_rgb == [255, 255, 255], axis=1)
+                    if np.sum(non_white_zeros) > 0:
+                        st.write(f"ERROR: {np.sum(non_white_zeros)} zero-value pixels are NOT white!")
+                        problem_colors = zero_rgb[non_white_zeros]
+                        st.write(f"Problem colors: {np.unique(problem_colors.reshape(-1, 3), axis=0)}")
                     else:
-                        fig_size = (10, 10)
+                        st.write("✓ All zero-value pixels are correctly white")
 
-                    fig, ax = plt.subplots(figsize=fig_size, subplot_kw={'projection': proj})
-                    ax.imshow(rgb, origin='upper', extent=extent)
-                    ax.set_extent(extent, crs=proj)
-                    ax.set_title(f"{layer_name} Map", fontsize=18)
-                    ax.set_aspect('equal')
+                # Double-check: explicitly force 0 and NoData pixels to white
+                rgb[band == 0] = [255, 255, 255]
+                rgb[band == -2147483648] = [255, 255, 255]
+                st.write("✓ Explicitly set all 0 and NoData pixels to white")
 
-                    gl = ax.gridlines(
-                        crs=ccrs.PlateCarree(),
-                        draw_labels=True,
-                        linewidth=0.8,
-                        color='gray',
-                        alpha=0.7,
-                        linestyle='--'
-                    )
+                # Rest of your plotting code remains the same
+                proj = ccrs.epsg(3338)
+                extent = [x0, x1, y0, y1]
 
-                    gl.top_labels = False 
-                    gl.right_labels = False 
+                if layout == "vertical":
+                    fig_size = (8, 11)
+                elif layout == "horizontal":
+                    fig_size = (11, 8)
+                else:
+                    fig_size = (10, 10)
 
-                    gl.xlabel_style = {'size': 10}
-                    gl.ylabel_style = {'size': 10}
+                fig, ax = plt.subplots(figsize=fig_size, subplot_kw={'projection': proj})
+                ax.imshow(rgb, origin='upper', extent=extent)
+                ax.set_extent(extent, crs=proj)
+                ax.set_title(f"{layer_name} Map", fontsize=18)
+                ax.set_aspect('equal')
 
-                    width = src.width
-                    height = src.height
+                gl = ax.gridlines(
+                    crs=ccrs.PlateCarree(),
+                    draw_labels=True,
+                    linewidth=0.8,
+                    color='gray',
+                    alpha=0.7,
+                    linestyle='--'
+                )
 
-                    add_scalebar_from_ax_extent(ax)
-                                            
-                    buf = io.BytesIO()
-                    plt.savefig(buf, format='png', bbox_inches='tight', dpi=150)
-                    plt.close(fig)
-                    buf.seek(0)
-                    map_img = Image.open(buf)
+                gl.top_labels = False 
+                gl.right_labels = False 
+
+                gl.xlabel_style = {'size': 10}
+                gl.ylabel_style = {'size': 10}
+
+                width = src.width
+                height = src.height
+
+                add_scalebar_from_ax_extent(ax)
+                                        
+                buf = io.BytesIO()
+                plt.savefig(buf, format='png', bbox_inches='tight', dpi=150)
+                plt.close(fig)
+                buf.seek(0)
+                map_img = Image.open(buf)
                             
             # ---------------------------------------------------------
             #  build legend and locator map
