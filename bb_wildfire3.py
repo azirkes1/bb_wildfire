@@ -639,7 +639,6 @@ with st.container():
         def append_credits_below( 
             image,
             text,
-            font_path=None,
             font_size=30,
             side_padding=40,
             top_padding=0,
@@ -651,10 +650,14 @@ with st.container():
 
             #load font 
             try:
-                font = ImageFont.truetype(font_path or "arial.ttf", font_size)
+                font = ImageFont.truetype( "arial.ttf", font_size)
             except OSError:
-                font = ImageFont.load_default()
-            temp_draw = ImageDraw.Draw(Image.new("RGB", (1, 1)))
+                try:
+                    # Try to load default with size
+                    font = ImageFont.load_default(size=font_size)
+                except TypeError:
+                    # Older Pillow versions don't support size parameter
+                    font = ImageFont.load_default()
 
             #text wrapping 
             max_width = image.width - 2 * side_padding
