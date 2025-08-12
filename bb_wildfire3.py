@@ -658,7 +658,7 @@ with st.container():
                 except TypeError:
                     # Older Pillow versions don't support size parameter
                     font = ImageFont.load_default()
-
+            temp_draw = ImageDraw.Draw(Image.new("RGB", (1, 1)))
             #text wrapping 
             max_width = image.width - 2 * side_padding
             words = text.split()
