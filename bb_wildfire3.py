@@ -26,6 +26,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from shapely.geometry import box
 from pyproj import Transformer
 import cartopy.crs as ccrs
+import rasterio
 from rasterio.crs import CRS
 from PIL import ImageDraw, ImageFont
 from matplotlib_scalebar.scalebar import ScaleBar
