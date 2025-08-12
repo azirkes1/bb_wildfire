@@ -775,7 +775,7 @@ with st.container():
         txt_bytes = generate_text_metadata_file(recipe, layer_name) 
 
         #get image to google earth engine and cast to int
-        img_ee = layer_recipe["ee_image"].clip(roi).unmask(0).toInt()
+        img_ee = ee.Image(layer_recipe["ee_image"]).clip(roi).unmask(-9999).toInt()
 
         #generate download URL with nearest resampling
         tiff_url = img_ee.getDownloadURL({
@@ -883,8 +883,11 @@ with st.container():
                 
                     #read the band and create a mask for nodata values
                     band = src.read(1)
-                    nodata = src.nodata or 0
-                    
+                    nodata = src.nodata if src.nodata is not None else -9999
+                    # Mask both the official NoData and any 0 values that shouldn't exist
+                    masked_band = np.ma.masked_equal(band, nodata)
+                    masked_band = np.ma.masked_equal(masked_band, 0)  # Also mask any 0s
+                    masked_band = np.ma.masked_equal(masked_band, -2147483648)  # And the int32 min value
 
                     st.write("Unique values in band:", np.unique(band))
                     st.write("NoData value:", nodata)
