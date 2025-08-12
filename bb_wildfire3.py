@@ -561,7 +561,8 @@ with st.container():
                     f"{value / 1609.344:.0f} miles"
                     if value >= 1609.344
                     # Convert to kilometers for values between one km and one mile
-                    else f"{value / 1000:.0f} km"
+                    elif value >= 1000
+                    else f"{value:.0f} meters" # Default to meters for smaller values
                 ),
             )
             ax.add_artist(scalebar)
