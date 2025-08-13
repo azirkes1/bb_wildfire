@@ -501,7 +501,7 @@ with st.container():
         # ---------------------------------------------------------
         
         #function to get metadata for layer and write it to text 
-       def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
+        def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
             
             # Case-insensitive search for the layer
             matched_key = next(
