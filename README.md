@@ -16,3 +16,7 @@ Created in fulfillment of the requirements for the Environmental Observation and
    ```
    $ streamlit run streamlit_app.py
    ```
+
+### How to view the app online 
+
+bbwildfire.streamlit.app
