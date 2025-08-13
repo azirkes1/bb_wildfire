@@ -500,85 +500,44 @@ with st.container():
         #  set up PDF helper functions 
         # ---------------------------------------------------------
         
-        #function to get metadata for layer and write it to text 
-        # def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
+        
+
+       def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
+        try:
+            st.write("🔥🔥🔥 THIS IS THE CORRECT DEBUG FUNCTION VERSION 🔥🔥🔥")
             
-        #     # Case-insensitive search for the layer
-        #     matched_key = next(
-        #         (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
-        #         None
-        #     )
-        #     if matched_key is None:
-        #         return b""  # return empty if layer not found
-
-        #     layer_recipe = recipe[matched_key]
-
-        #     description = layer_recipe.get("description", "No description available.")
-        #     credits = layer_recipe.get("credits", "No credits provided.")
-        #     classes = layer_recipe.get("labels", {})
-        #     symbology = layer_recipe.get("colors", {})
-
-        #     # Build the metadata text
-        #     metadata_lines = [
-        #         f"Layer: {matched_key}",
-        #         f"Description: {description}",
-        #         f"Credits: {credits}",
-        #         "Classes:",
-        #         *[f"  - {k}: {v}" for k, v in classes.items()],
-        #         "Symbology:",
-        #         *[f"  - {k}: RGB{v}" for k, v in symbology.items()]
-        #     ]
-
-        #     text = "\n".join(metadata_lines)
-        #     return text.encode("utf-8")
-
-        def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
-            try:
-                st.write("🔥 DEBUG: Function started!")
-                
-                # Case-insensitive search for the layer
-                matched_key = next(
-                    (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
-                    None
-                )
-                
-                st.write(f"🔥 DEBUG: matched_key = {matched_key}")
-                
-                if matched_key is None:
-                    st.write("🔥 DEBUG: No matching layer found!")
-                    return b""
-                
-                layer_recipe = recipe[matched_key]
-                st.write(f"🔥 DEBUG: Got layer_recipe")
-                
-                description = layer_recipe.get("description", "No description available.")
-                st.write(f"🔥 DEBUG: Got description: {description[:50]}...")
-                
-                credits = layer_recipe.get("credits", "No credits provided.")
-                classes = layer_recipe.get("labels", {})
-                symbology = layer_recipe.get("colors", {})
-
-                # Build the metadata text
-                metadata_lines = [
-                    f"Layer: {matched_key}",
-                    f"Description: {description}",
-                    f"Credits: {credits}",
-                    "Classes:",
-                    *[f"  - {k}: {v}" for k, v in classes.items()],
-                    "Symbology:",
-                    *[f"  - {k}: RGB{v}" for k, v in symbology.items()]
-                ]
-
-                text = "\n".join(metadata_lines)
-                st.write("🔥 DEBUG: Generated text successfully")
-                return text.encode("utf-8")
-                
-            except Exception as e:
-                st.error(f"🚨 ERROR in generate_text_metadata_file: {e}")
-                st.error(f"🚨 Error type: {type(e)}")
-                import traceback
-                st.error(f"🚨 Traceback: {traceback.format_exc()}")
+            # Case-insensitive search for the layer
+            matched_key = next(
+                (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
+                None
+            )
+            
+            if matched_key is None:
                 return b""
+            
+            layer_recipe = recipe[matched_key]
+            description = layer_recipe.get("description", "No description available.")
+            credits = layer_recipe.get("credits", "No credits provided.")
+            classes = layer_recipe.get("labels", {})
+            symbology = layer_recipe.get("colors", {})
+
+            # Build the metadata text
+            metadata_lines = [
+                f"Layer: {matched_key}",
+                f"Description: {description}",
+                f"Credits: {credits}",
+                "Classes:",
+                *[f"  - {k}: {v}" for k, v in classes.items()],
+                "Symbology:",
+                *[f"  - {k}: RGB{v}" for k, v in symbology.items()]
+            ]
+
+            text = "\n".join(metadata_lines)
+            return text.encode("utf-8")
+            
+        except Exception as e:
+            st.error(f"🚨 ERROR: {e}")
+            return b""
         #function to calculate bounding box from coordinates
         def _min_max_coords(coords): 
                     xs, ys = zip(*coords)
