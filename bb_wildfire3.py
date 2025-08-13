@@ -177,7 +177,6 @@ with st.container():
     # ---------------------------------------------------------
     st.markdown("""
     <style>
-    /* Make the Folium iframe and inner map responsive */
     .folium-map, iframe {
     width: 100% !important;
     display: block !important;
@@ -187,20 +186,20 @@ with st.container():
     /* Desktop / landscape */
     @media (min-width: 769px), (orientation: landscape) {
     .folium-map, iframe {
-        height: 88vh !important;  /* tall on desktop */
-        max-height: 88vh !important;
+        height: 85vh !important;
+        max-height: 85vh !important;
     }
     }
 
-    /* Mobile portrait: use dynamic viewport so mobile browser chrome doesn't crop */
+    /* Mobile portrait: 60% of screen height */
     @media (max-width: 768px) and (orientation: portrait) {
     .folium-map, iframe {
-        height: 100dvh !important;    /* full visible viewport height */
-        max-height: 100dvh !important;
+        height: 60vh !important;
+        max-height: 60vh !important;
     }
     }
 
-    /* Trim padding so the map really can use the whole screen */
+    /* Trim padding */
     .main > div:first-child,
     .main .block-container > div:first-child {
     margin-top: 0 !important;
