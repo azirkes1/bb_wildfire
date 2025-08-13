@@ -503,21 +503,22 @@ with st.container():
         #function to get metadata for layer and write it to text 
         def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes: 
 
-            #attempts to find layer_name in recipe keys
+            # attempts to find layer_name in recipe keys
             matched_key = next((k for k in recipe if k.strip().lower() == layer_name.strip().lower()), None) 
             if matched_key is None:
-                return b""  #return empty bytes 
+                return b""  # return empty bytes 
 
-            #get metadata for the layer
+            # get metadata for the layer
             layer_recipe = recipe.get(matched_key, {}) 
             classes = layer_recipe.get("labels", {})
             credits = layer_recipe.get("credits", "")
             symbology = layer_recipe.get("colors", {})
-            description = layer_recipe.get("description", "")
+            description = layer_recipe.get("description", "No description available.")
 
-            #writes metadata to text and returns it 
+            # writes metadata to text and returns it
             metadata_lines = [
                 f"Layer: {matched_key}",
+                f"Description: {description}",  # include description
                 f"Credits: {credits}",
                 "Classes:",
                 *[f"  - {k}: {v}" for k, v in classes.items()],
