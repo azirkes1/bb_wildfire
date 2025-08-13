@@ -293,7 +293,7 @@ with st.container():
 
     # --- Sync the selected values for your application logic ---
     # Since there's only one set of dropdowns, we directly use their values.
-    # Initialize session state if not already present
+    ## Initialize session state if not already present
     if 'selected_options' not in st.session_state:
         st.session_state.selected_options = []
     if 'selected_filetype' not in st.session_state:
