@@ -249,21 +249,21 @@ with st.container():
             key="data_layers_select" # Single key for unified multiselect
         )
         
-        st.markdown(
-        """
-        <div style='color: #808080; line-height: 1.5; margin-bottom: 20px;'>
-            <u style='font-size:16px;'>Data Sources:</u><br><br>
-            <div style='margin-left:10px;'>
-                <b>Ownership</b> - Bureau of Land Management<br>
-                <b>Land cover</b> - National Land Cover Database<br>
-                <b>Wildfire Jurisdiction</b> - Bureau of Land Management<br>
-                <b>Flammability Hazard</b> - University of Alaska - Anchorage<br>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-        
+        with st.expander("Click here for data sources"):
+            st.markdown(
+                """
+                <div style='color: #808080; line-height: 1.5;'>
+                    <b>Ownership</b> – Bureau of Land Management<br>
+                    <b>Land Cover</b> – National Land Cover Database<br>
+                    <b>Wildfire Jurisdiction</b> – Bureau of Land Management<br>
+                    <b>Flammability Hazard</b> – University of Alaska – Anchorage<br>
+                    <b>BBNC Boundary</b> – Google Earth Engine Asset: projects/ee-azirkes1/assets/AK_proj/bbnc_boundary<br>
+                    <b>Place Names</b> – ArcGIS FeatureServer: PlaceNamesBBNC
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+                
         selected_filetype = st.multiselect(
             "What format do you want the data in?",
             ['.tif', '.pdf'],
