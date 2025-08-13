@@ -930,13 +930,18 @@ with st.container():
         
         #extract just the selected layer's recipe
         layer_recipe = recipe[layer_name] 
-       
+
+        st.write("🚨 ABOUT TO CALL generate_text_metadata_file")  # Add this line
+        st.write(f"🚨 layer_name = {layer_name}")  # Add this line
+        st.write(f"🚨 recipe keys = {list(recipe.keys())}")  # Add this line
+
         #create metadata text file 
         txt_bytes = generate_text_metadata_file(recipe, layer_name) 
 
+        st.write("🚨 FUNCTION COMPLETED")  # Add this line
+
         #get image to google earth engine and cast to int
         img_ee = layer_recipe["ee_image"].clip(roi).unmask(0).toInt()
-
         #generate download URL with nearest resampling
         tiff_url = img_ee.getDownloadURL({
             'scale': 30,
