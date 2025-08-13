@@ -186,15 +186,14 @@ with st.container():
     /* Desktop / landscape */
     @media (min-width: 769px), (orientation: landscape) {
         .folium-map, iframe {
-            height: 80vh !important;
+            height: 85vh !important; /* slightly taller than before */
         }
     }
 
-    /* Mobile portrait: make it taller */
+    /* Mobile portrait: fill almost full screen */
     @media (max-width: 768px) and (orientation: portrait) {
         .folium-map, iframe {
-            height: auto !important;
-            max-height: 90vh !important; /* was 70vh */
+            height: calc(100vh - 40px) !important; /* minus header space */
             width: 100% !important;
             max-width: 100% !important;
         }
@@ -286,13 +285,11 @@ with st.container():
     #get bbnc boundary from Google Earth Engine 
     bbnc = ee.FeatureCollection('projects/ee-azirkes1/assets/AK_proj/bbnc_boundary')
 
-    # Get bounding box for BBNC
-    bounds = bbnc.geometry().bounds().getInfo()['coordinates'][0]
-    # Folium expects [[southwest_lat, southwest_lon], [northeast_lat, northeast_lon]]
-    min_lon = min([pt[0] for pt in bounds])
-    min_lat = min([pt[1] for pt in bounds])
-    max_lon = max([pt[0] for pt in bounds])
-    max_lat = max([pt[1] for pt in bounds])
+    bb_bounds = bbnc.geometry().bounds().getInfo()['coordinates'][0]
+    min_lon = min(pt[0] for pt in bb_bounds)
+    min_lat = min(pt[1] for pt in bb_bounds)
+    max_lon = max(pt[0] for pt in bb_bounds)
+    max_lat = max(pt[1] for pt in bb_bounds)
 
     #create folium map 
     m = folium.Map(location=[58.5, -157],control_scale = True, zoom_start=6, attr_control=False)
