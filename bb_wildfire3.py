@@ -173,190 +173,214 @@ with st.container():
         }}
     # Alternative approach: Create mobile-specific content
 
-# --- CSS and JS for device detection and styling ---
-st.markdown("""
-<style>
-/* Streamlit's main block container */
-.block-container {
-    padding-top: 0.5rem !important;
-    padding-bottom: 0.5rem !important;
-}
-
-/* Hide header and footer */
-footer, header, .stDeployButton {
-    display: none !important;
-}
-
-/* Custom CSS for desktop */
-@media (min-width: 769px) {
-    section[data-testid="stSidebar"] {
-        width: 350px !important;
+    st.markdown("""
+    <style>
+    /* Remove the default top spacing from Streamlit's main content area */
+    .main > div:first-child,
+    .main .block-container > div:first-child {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
     }
-}
 
-/* Custom CSS for mobile */
-@media (max-width: 768px) {
-    section[data-testid="stSidebar"] {
+    /* Force remove any top spacing from block containers */
+    div[data-testid="block-container"] {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* Hide Streamlit's default footer, header, and deploy button */
+    footer, header, .stDeployButton {
         display: none !important;
     }
-}
-</style>
-""", unsafe_allow_html=True)
 
-# --- JavaScript to detect device and set session state ---
-st.markdown("""
-<script>
-    function getMobileState() {
-        const isMobile = window.innerWidth <= 768;
-        window.parent.postMessage({
-            type: 'streamlit:set_session_state',
-            key: 'is_mobile',
-            value: isMobile
-        }, '*');
+    /* Ensure the map iframe fits well */
+    .element-container:has(.folium-map),
+    iframe {
+        margin-bottom: 0px !important;
     }
-    window.addEventListener('load', getMobileState);
-    window.addEventListener('resize', getMobileState);
-    getMobileState(); // Run on initial load
-</script>
-""", unsafe_allow_html=True)
 
-# Wait for the session state to be set
-if 'is_mobile' not in st.session_state:
-    st.stop()
+    .folium-map {
+        height: 500px !important; /* Set a fixed height for the map */
+        overflow: hidden !important;
+    }
 
-# --- Main App Logic ---
+    iframe {
+        height: 500px !important;
+        display: block;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        border: none !important;
+    }
 
-# Define your data layers and file types
-recipe = {
-    "Ownership": "...",
-    "Land cover": "...",
-    "Wildfire Jurisdiction": "...",
-    "Flammability Hazard": "..."
-}
-options_filetype = ['.tif', '.pdf']
+    /* Mobile-only content: hidden by default on desktop */
+    .mobile-only {
+        display: none !important;
+    }
 
-# Conditionally place the widgets
-if st.session_state.is_mobile:
-    st.write('This tool allows a user to download relevant wildfire management data layers clipped to a region of interest. ' \
-             'Simply select the data layers and data format you are interested in below. Next, draw a boundary on the map by clicking on the rectangle tool in the upper left corner of the map. ' \
-             'This will be used as the clipping boundary. ' \
-             'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.')
+    /* Desktop-only content: hidden by default on mobile */
+    .desktop-only {
+        display: block !important; /* Visible by default on desktop */
+    }
 
-    st.markdown('<div class="mobile-content">', unsafe_allow_html=True)
+    /* Style for the mobile dropdown container */
+    .mobile-content {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
 
-    # Widgets for mobile version
-    selected_options = st.multiselect(
-        "Which data layers would you like to download?",
-        list(recipe.keys()),
-        key="data_layers"
+    /* Media query for Mobile devices (max-width 768px) */
+    @media (max-width: 768px) {
+        .mobile-only {
+            display: block !important; /* Show mobile content */
+        }
+        .desktop-only {
+            display: none !important; /* Hide desktop content */
+        }
+        section[data-testid="stSidebar"] {
+            display: none !important; /* Hide sidebar on mobile */
+        }
+    }
+
+    /* Media query for Desktop devices (min-width 769px) */
+    @media (min-width: 769px) {
+        .mobile-only {
+            display: none !important; /* Hide mobile content */
+        }
+        .desktop-only {
+            display: block !important; /* Show desktop content */
+        }
+        section[data-testid="stSidebar"] {
+            display: block !important; /* Show sidebar on desktop */
+            width: 350px !important; /* Set sidebar width */
+            overflow: auto !important; /* Allow scrolling if content overflows */
+            max-height: none !important;
+        }
+        /* Ensure sidebar children also handle overflow correctly */
+        section[data-testid="stSidebar"] > div {
+            overflow: auto !important;
+        }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # --- App Content ---
+
+    # Explanation text, visible on both unless explicitly hidden by media queries
+    st.write(
+        'This tool allows a user to download relevant wildfire management data layers clipped to a region of interest. ' \
+        'Simply select the data layers and data format you are interested in below. Next, draw a boundary on the map by clicking on the rectangle tool in the upper left corner of the map. ' \
+        'This will be used as the clipping boundary. ' \
+        'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.'
     )
 
-    st.markdown("""
+    # --- Mobile-only Dropdowns (visible above map on mobile, hidden on desktop) ---
+    st.markdown('<div class="mobile-only">', unsafe_allow_html=True)
+    st.markdown('<div class="mobile-content">', unsafe_allow_html=True)
+
+    selected_options_mobile = st.multiselect(
+        "Which data layers would you like to download?",
+        list(recipe.keys()),
+        key="mobile_data_layers_select" # Unique key for mobile multiselect
+    )
+
+    st.markdown(
+        """
         <div style='color: #808080; margin-bottom: 15px;'>
             <u>Ownership</u> - Bureau of Land Management<br>
             <u>Land cover</u> - National Land Cover Database<br>
             <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
             <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
         </div>
-    """, unsafe_allow_html=True)
-
-    selected_filetype = st.multiselect(
-        "What format do you want the data in?",
-        options_filetype,
-        key="file_format"
+        """,
+        unsafe_allow_html=True
     )
 
-    st.markdown("""
+    selected_filetype_mobile = st.multiselect(
+        "What format do you want the data in?",
+        ['.tif', '.pdf'],
+        key="mobile_file_format_select" # Unique key for mobile multiselect
+    )
+
+    st.markdown(
+        """
         <div style='color: #808080; margin-bottom: 15px;'>
             PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
         </div>
-    """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True
+    )
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True) # Close mobile-content
+    st.markdown('</div>', unsafe_allow_html=True) # Close mobile-only
 
-else: # Desktop version
-    # Widgets in the sidebar
+    # --- Desktop-only Dropdowns (visible in sidebar on desktop, hidden on mobile) ---
+    # The 'desktop-only' class is implied by being outside the 'mobile-only' div
+    # and within the st.sidebar context for desktop, controlled by media queries.
     with st.sidebar:
-        selected_options = st.multiselect(
+        # Adding a div to explicitly wrap desktop sidebar content if needed for future styling,
+        # though the st.sidebar context handles most of it.
+        st.markdown('<div class="desktop-only">', unsafe_allow_html=True)
+
+        selected_options_desktop = st.multiselect(
             "Which data layers would you like to download?",
             list(recipe.keys()),
-            key="data_layers"
+            key="desktop_data_layers_select" # Unique key for desktop multiselect
         )
-        st.markdown("""
-            <div style='color: #808080; margin-bottom: 15px;'>
+        
+        st.markdown(
+            """
+            <div style='color: #808080; overflow: hidden; white-space: normal; word-wrap: break-word; margin-bottom: 15px;'>
                 <u>Ownership</u> - Bureau of Land Management<br>
                 <u>Land cover</u> - National Land Cover Database<br>
                 <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
                 <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
             </div>
-        """, unsafe_allow_html=True)
-
-        selected_filetype = st.multiselect(
-            "What format do you want the data in?",
-            options_filetype,
-            key="file_format"
+            """,
+            unsafe_allow_html=True
         )
-        st.markdown("""
-            <div style='color: #808080; margin-bottom: 15px;'>
+        
+        selected_filetype_desktop = st.multiselect(
+            "What format do you want the data in?",
+            ['.tif', '.pdf'],
+            key="desktop_file_format_select" # Unique key for desktop multiselect
+        )
+        
+        st.markdown(
+            """
+            <div style='color: #808080; overflow: hidden; white-space: normal; word-wrap: break-word; margin-bottom: 15px;'>
                 PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
             </div>
-        """, unsafe_allow_html=True)
-    # ---------------------------------------------------------
-    #  define metadata - title, ee_image, colors, labels, credits
-    # ---------------------------------------------------------
-   
-    
-    # ---------------------------------------------------------
-    #  add elements to app
-    # ---------------------------------------------------------
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown('</div>', unsafe_allow_html=True) # Close desktop-only
 
-    #explain how to select on the map 
-    st.write('This tool allows a user to download relevant wildfire management data layers clipped to a region of interest. ' \
-    'Simply select the data layers and data format you are interested in below. Next, draw a boundary on the map by clicking on the rectangle tool in the upper left corner of the map. ' \
-    'This will be used as the clipping boundary. ' \
-    'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.')
+    # --- Sync the selected values for your application logic ---
+    # This ensures that 'st.session_state.selected_options' and 'st.session_state.selected_filetype'
+    # always reflect the values from whichever set of dropdowns is currently active.
 
-    # #data layer multiselect
-    # with st.sidebar:
-    #     selected_options = st.session_state.get('selected_options', [])
+    # Initialize session state if not already present
+    if 'selected_options' not in st.session_state:
+        st.session_state.selected_options = []
+    if 'selected_filetype' not in st.session_state:
+        st.session_state.selected_filetype = []
 
+    # Update session state based on which set of dropdowns has a value
+    # Prioritize mobile if it has a selection, otherwise use desktop's.
+    # This ensures the final_selected_options always holds the active selection.
+    if selected_options_mobile:
+        st.session_state.selected_options = selected_options_mobile
+    elif selected_options_desktop:
+        st.session_state.selected_options = selected_options_desktop
 
-    # #text box for data layers
-    # with st.sidebar:
-    #     st.markdown(
-    #         """
-    #         <div style='color: #808080; overflow: hidden;
-    #         white-space: normal;
-    #         word-wrap: break-word;
-    #         margin-bottom: 15px;'>
-    #             <u>Ownership</u> - Bureau of Land Management<br>
-    #             <u>Land cover</u> - National Land Cover Database<br>
-    #             <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
-    #             <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
-    #         </div>
-    #         """,
-    #         unsafe_allow_html=True
-    #     )
+    if selected_filetype_mobile:
+        st.session_state.selected_filetype = selected_filetype_mobile
+    elif selected_filetype_desktop:
+        st.session_state.selected_filetype = selected_filetype_desktop
 
-    # #data format multiselect
-    # options_filetype = '.tif', '.pdf'
-    # with st.sidebar:
-    #     selected_filetype = st.session_state.get('selected_filetype', [])
-
-    # #data format text box
-    # with st.sidebar:
-    #     st.markdown(
-    #         """
-    #         <div style='color: #808080;  overflow: hidden;
-    #         white-space: normal;
-    #         word-wrap: break-word;
-    #         margin-bottom: 15px;'>
-    #             PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
-                
-    #         </div>
-    #         """,
-    #         unsafe_allow_html=True
-    #     )
     # ---------------------------------------------------------
     #  Build map and drawing tools
     # ---------------------------------------------------------
