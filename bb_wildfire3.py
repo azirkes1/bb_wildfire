@@ -217,7 +217,16 @@ with st.container():
     # ---------------------------------------------------------
     #  App content
     # ---------------------------------------------------------
-    st.markdown("### Bristol Bay Wildfire Management Data Tool")
+    st.markdown("""
+    <style>
+    h1 {
+        font-size: 28px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.title("Bristol Bay Wildfire Management Data Tool")
+    
     # Explanation text - visible on both mobile and desktop
     st.write(
         'The goal of this tool is to make wildfire managment data layers more accessible and easier to use by cropping data to your area of interest and mapping the data. ' \
