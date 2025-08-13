@@ -439,12 +439,18 @@ with st.container():
     </script>
     """
     m.get_root().html.add_child(folium.Element(refit_js))
-    st_folium(m, use_container_width=True)
+    
     #add layer toggle control
     folium.LayerControl(collapsed=False).add_to(m)
     
     #render map and capture drawing events
-    map_result = st_folium(m, height=500, width=700, returned_objects=["all_drawings"])
+    map_result = st_folium(
+        m,
+        use_container_width=True,
+        height=500,  # or 60vh via CSS
+        returned_objects=["all_drawings"]
+    )
+
 
     # ---------------------------------------------------------
     #  main function, returns pdf, tif, metadata
