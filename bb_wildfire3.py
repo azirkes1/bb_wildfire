@@ -348,50 +348,9 @@ with st.container():
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Regular sidebar (hidden on mobile)
-    with st.sidebar:
-        st.markdown('<div class="desktop-only">', unsafe_allow_html=True)
-        selected_options = st.multiselect(
-            "Which data layers would you like to download?",
-            list(recipe.keys()),
-            key="desktop_data_layers"
-        )
+    
         
-        st.markdown(
-            """
-            <div style='color: #808080; overflow: hidden;
-            white-space: normal;
-            word-wrap: break-word;
-            margin-bottom: 15px;'>
-                <u>Ownership</u> - Bureau of Land Management<br>
-                <u>Land cover</u> - National Land Cover Database<br>
-                <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
-                <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        
-        selected_filetype = st.multiselect(
-            "What format do you want the data in?",
-            ['.tif', '.pdf'],
-            key="desktop_file_format"
-        )
-        
-        st.markdown(
-            """
-            <div style='color: #808080;  overflow: hidden;
-            white-space: normal;
-            word-wrap: break-word;
-            margin-bottom: 15px;'>
-                PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
-                
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
-
+       
     # Sync the values between mobile and desktop
     # Combine values from both versions to handle the mobile error
     if 'mobile_data_layers' in st.session_state and st.session_state.mobile_data_layers:
