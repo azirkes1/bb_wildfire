@@ -175,28 +175,8 @@ with st.container():
     # ---------------------------------------------------------
     #  CSS for Layout
     # ---------------------------------------------------------
-    st.markdown("""
+   st.markdown("""
     <style>
-    /* Base layout adjustments */
-    .main > div:first-child,
-    .main .block-container > div:first-child {
-        margin-top: 0 !important;
-        padding-top: 0 !important;
-    }
-    div[data-testid="block-container"] {
-        padding-top: 0 !important;
-        margin-top: 0 !important;
-    }
-
-    /* Hide footer/deploy button */
-    footer, .stDeployButton { display: none !important; }
-
-    /* Map iframe default styles */
-    .element-container:has(.folium-map),
-    iframe {
-        margin-bottom: 0px !important;
-    }
-
     .folium-map, iframe {
         display: block;
         border: none !important;
@@ -207,17 +187,16 @@ with st.container():
     @media (min-width: 769px), (orientation: landscape) {
         .folium-map, iframe {
             height: 80vh !important;
-            width: 100% !important;
         }
     }
 
-    /* Mobile portrait: shrink width & height proportionally */
+    /* Mobile portrait: make it taller */
     @media (max-width: 768px) and (orientation: portrait) {
         .folium-map, iframe {
-            width: 100% !important;    /* container width */
-            max-width: 100% !important; /* never overflow */
-            height: auto !important;   /* auto height keeps ratio */
-            max-height: 70vh !important;
+            height: auto !important;
+            max-height: 90vh !important; /* was 70vh */
+            width: 100% !important;
+            max-width: 100% !important;
         }
     }
     </style>
@@ -304,9 +283,21 @@ with st.container():
             return False
         return True
 
+    #get bbnc boundary from Google Earth Engine 
+    bbnc = ee.FeatureCollection('projects/ee-azirkes1/assets/AK_proj/bbnc_boundary')
+
+    # Get bounding box for BBNC
+    bounds = bbnc.geometry().bounds().getInfo()['coordinates'][0]
+    # Folium expects [[southwest_lat, southwest_lon], [northeast_lat, northeast_lon]]
+    min_lon = min([pt[0] for pt in bounds])
+    min_lat = min([pt[1] for pt in bounds])
+    max_lon = max([pt[0] for pt in bounds])
+    max_lat = max([pt[1] for pt in bounds])
+
     #create folium map 
     m = folium.Map(location=[58.5, -157],control_scale = True, zoom_start=6, attr_control=False)
-    
+    m.fit_bounds([[min_lat, min_lon], [max_lat, max_lon]])
+
     #add satellite imagery 
     folium.TileLayer(
         tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
@@ -379,8 +370,7 @@ with st.container():
         )
     draw.add_to(m)
     
-    #get bbnc boundary from Google Earth Engine 
-    bbnc = ee.FeatureCollection('projects/ee-azirkes1/assets/AK_proj/bbnc_boundary')
+   
 
     #turn bbnc boundary into geojson geometry and add to map
     geojson_dict = bbnc.geometry().getInfo()
