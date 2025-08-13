@@ -177,11 +177,44 @@ with st.container():
             return window.innerWidth <= 768;
         }
 
-        if (isMobile()) {
-            document.body.classList.add('mobile-device');
-        } else {
-            document.body.classList.add('desktop-device');
+        function updateLayout() {
+            // Remove existing classes
+            document.body.classList.remove('mobile-device', 'desktop-device');
+            
+            if (isMobile()) {
+                document.body.classList.add('mobile-device');
+                // Hide sidebar on mobile
+                const sidebar = document.querySelector('section[data-testid="stSidebar"]');
+                if (sidebar) sidebar.style.display = 'none';
+                
+                // Show mobile content
+                const mobileElements = document.querySelectorAll('.mobile-only');
+                mobileElements.forEach(el => el.style.display = 'block');
+                
+                // Hide desktop content
+                const desktopElements = document.querySelectorAll('.desktop-only');
+                desktopElements.forEach(el => el.style.display = 'none');
+            } else {
+                document.body.classList.add('desktop-device');
+                // Show sidebar on desktop
+                const sidebar = document.querySelector('section[data-testid="stSidebar"]');
+                if (sidebar) sidebar.style.display = 'block';
+                
+                // Hide mobile content
+                const mobileElements = document.querySelectorAll('.mobile-only');
+                mobileElements.forEach(el => el.style.display = 'none');
+                
+                // Show desktop content
+                const desktopElements = document.querySelectorAll('.desktop-only');
+                desktopElements.forEach(el => el.style.display = 'block');
+            }
         }
+
+        // Run on load and resize
+        window.addEventListener('load', updateLayout);
+        window.addEventListener('resize', updateLayout);
+        // Run immediately
+        updateLayout();
         </script>
         """
 
@@ -190,17 +223,35 @@ with st.container():
 
     st.markdown("""
     <style>
-    /* Hide mobile content on desktop */
-    .desktop-device .mobile-only {
+    /* Remove the white bar at top */
+    .main > div:first-child {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* Remove initial spacing */
+    .block-container {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+        margin-top: 0 !important;
+    }
+
+    /* Hide mobile content on desktop by default */
+    .mobile-only {
         display: none !important;
     }
 
-    /* Hide sidebar on mobile, show mobile content */
-    .mobile-device section[data-testid="stSidebar"] {
-        display: none !important;
-    }
-
+    /* Hide desktop-only content on mobile */
     .mobile-device .desktop-only {
+        display: none !important;
+    }
+
+    .mobile-device .mobile-only {
+        display: block !important;
+    }
+
+    /* Ensure sidebar is hidden on mobile */
+    .mobile-device section[data-testid="stSidebar"] {
         display: none !important;
     }
 
@@ -213,13 +264,46 @@ with st.container():
         margin-bottom: 20px;
     }
 
-    /* Your existing styles... */
-    .block-container {
-        padding-top: 0.5rem !important;
-        padding-bottom: 0.5rem !important;
+    /* Desktop sidebar styling */
+    .desktop-device section[data-testid="stSidebar"] {
+        overflow: hidden !important;
+        max-height: none !important;
+        width: 350px !important;
     }
 
-    /* ... rest of your existing CSS ... */
+    .desktop-device section[data-testid="stSidebar"] > div {
+        overflow: hidden !important;
+    }
+
+    /* Your existing styles... */
+    .element-container:has(.folium-map),
+    iframe {
+        margin-bottom: 0px !important;
+    }
+
+    .folium-map {
+        height: 500px !important;
+        overflow: hidden !important;
+    }
+
+    footer, header, .stDeployButton {
+        display: none !important;
+    }
+
+    iframe {
+        height: 500px !important;
+        display: block;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        border: none !important;
+    }
+
+    .element-container:has(.folium-map),
+    .block-container,
+    .main {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -309,9 +393,24 @@ with st.container():
         st.markdown('</div>', unsafe_allow_html=True)
 
     # Sync the values between mobile and desktop
-    # Use whichever one has values
-    final_selected_options = selected_options_mobile if selected_options_mobile else selected_options
-    final_selected_filetype = selected_filetype_mobile if selected_filetype_mobile else selected_filetype
+    # Combine values from both versions to handle the mobile error
+    if 'mobile_data_layers' in st.session_state and st.session_state.mobile_data_layers:
+        final_selected_options = st.session_state.mobile_data_layers
+    elif 'desktop_data_layers' in st.session_state and st.session_state.desktop_data_layers:
+        final_selected_options = st.session_state.desktop_data_layers
+    else:
+        final_selected_options = []
+
+    if 'mobile_file_format' in st.session_state and st.session_state.mobile_file_format:
+        final_selected_filetype = st.session_state.mobile_file_format
+    elif 'desktop_file_format' in st.session_state and st.session_state.desktop_file_format:
+        final_selected_filetype = st.session_state.desktop_file_format
+    else:
+        final_selected_filetype = []
+
+    # Store the final values in session state for use throughout the app
+    st.session_state.selected_options = final_selected_options
+    st.session_state.selected_filetype = final_selected_filetype
     # ---------------------------------------------------------
     #  define metadata - title, ee_image, colors, labels, credits
     # ---------------------------------------------------------
@@ -329,10 +428,8 @@ with st.container():
 
     #data layer multiselect
     with st.sidebar:
-        selected_options = st.multiselect(
-            "Which data layers would you like to download?",
-            list(recipe.keys())
-        )
+        selected_options = st.session_state.get('selected_options', [])
+
 
     #text box for data layers
     with st.sidebar:
@@ -354,10 +451,7 @@ with st.container():
     #data format multiselect
     options_filetype = '.tif', '.pdf'
     with st.sidebar:
-        selected_filetype = st.multiselect(
-            "What format do you want the data in?",
-            options_filetype
-        )
+        selected_filetype = st.session_state.get('selected_filetype', [])
 
     #data format text box
     with st.sidebar:
