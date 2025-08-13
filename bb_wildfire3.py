@@ -176,7 +176,7 @@ with st.container():
 
 # --- Custom CSS for Responsive Layout ---
 # This CSS will hide/show elements based on screen width
-    st.markdown("""
+   st.markdown("""
     <style>
     /* Remove the default top spacing from Streamlit's main content area */
     .main > div:first-child,
@@ -253,8 +253,7 @@ with st.container():
                 window.parent.postMessage({
                     streamlit: {
                         setSessionState: {
-                            is_mobile_detected: isMobile,
-                            device_detection_complete: true // New flag to indicate detection has run
+                            is_mobile_detected: isMobile
                         }
                     }
                 }, '*');
@@ -269,20 +268,17 @@ with st.container():
     </script>
     """, unsafe_allow_html=True)
 
-    # Initialize session state for device detection if not already set
+    # Initialize session state for device detection. Default to None.
     if 'is_mobile_detected' not in st.session_state:
-        st.session_state.is_mobile_detected = False # Default until JS updates
+        st.session_state.is_mobile_detected = None
 
-    if 'device_detection_complete' not in st.session_state:
-        st.session_state.device_detection_complete = False # Default until JS updates
-
-    # --- Force initial rerun if detection is not complete ---
-    # This ensures Streamlit reruns after JS has had a chance to update session_state
-    if not st.session_state.device_detection_complete:
-        # Optional: You can show a loading message here
-        # st.info("Detecting device type... Please wait.")
-        time.sleep(0.1) # Small delay to allow JS message to process
-        st.rerun() # Force a rerun
+    # --- Force initial rendering to wait for device detection ---
+    # If device detection hasn't completed yet (is_mobile_detected is None),
+    # show a loading message and stop the script. The JavaScript will update
+    # the session state and trigger a rerun.
+    if st.session_state.is_mobile_detected is None:
+        st.info("Detecting device type... Please wait.")
+        st.stop() # Stop execution until the JS updates the session state
 
     # --- App Content ---
 
@@ -293,8 +289,8 @@ with st.container():
         'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.'
     )
 
-    # Initialize all selected variables to empty lists outside the if/else blocks
-    # This prevents NameError regardless of which block is executed
+    # Initialize selected variables to empty lists
+    # This ensures they are always defined, preventing NameError
     selected_options_mobile = []
     selected_filetype_mobile = []
     selected_options_desktop = []
@@ -344,7 +340,7 @@ with st.container():
             )
 
             st.markdown('</div>', unsafe_allow_html=True) # Close mobile-content
-    else:
+    else: # If is_mobile_detected is False (desktop)
         # --- Desktop-only Dropdowns (within sidebar) ---
         with st.sidebar:
             selected_options_desktop = st.multiselect(
@@ -393,17 +389,18 @@ with st.container():
     current_selected_filetype = []
 
     if st.session_state.is_mobile_detected:
-        # Get values from mobile dropdowns if active
-        current_selected_options = selected_options_mobile
-        current_selected_filetype = selected_filetype_mobile
+        # Get values from mobile dropdowns
+        current_selected_options = st.session_state.get("mobile_data_layers_select", [])
+        current_selected_filetype = st.session_state.get("mobile_file_format_select", [])
     else:
-        # Get values from desktop dropdowns if active
-        current_selected_options = selected_options_desktop
-        current_selected_filetype = selected_filetype_desktop
+        # Get values from desktop dropdowns
+        current_selected_options = st.session_state.get("desktop_data_layers_select", [])
+        current_selected_filetype = st.session_state.get("desktop_file_format_select", [])
 
     # Update the final session state variables
     st.session_state.selected_options = current_selected_options
     st.session_state.selected_filetype = current_selected_filetype
+
         # ---------------------------------------------------------
     #  Build map and drawing tools
     # ---------------------------------------------------------
