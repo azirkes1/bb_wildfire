@@ -216,8 +216,8 @@ with st.container():
     }
 
     /* Mobile-only content container: hidden by default on desktop */
-    .mobile-only-container {
-        display: none; /* Hidden by default */
+    .mobile-only-content-wrapper {
+        display: none; /* Hidden by default on desktop */
     }
 
     /* Style for the mobile dropdown container content */
@@ -231,7 +231,7 @@ with st.container():
 
     /* Media query for Mobile devices (max-width 768px) */
     @media (max-width: 768px) {
-        .mobile-only-container {
+        .mobile-only-content-wrapper {
             display: block !important; /* Show mobile content */
         }
         section[data-testid="stSidebar"] {
@@ -241,19 +241,22 @@ with st.container():
 
     /* Media query for Desktop devices (min-width 769px) */
     @media (min-width: 769px) {
-        .mobile-only-container {
-            display: none !important; /* Hide mobile content container */
+        .mobile-only-content-wrapper {
+            display: none !important; /* Hide mobile content wrapper */
         }
         /* IMPORTANT FIX: Explicitly hide the Streamlit multiselect and markdown elements
         when they are descendants of the mobile container on desktop.
-        This overrides Streamlit's default rendering behavior. */
-        .mobile-only-container div[data-testid="stMultiSelect"],
-        .mobile-only-container .stMarkdown {
+        This overrides Streamlit's default rendering behavior aggressively. */
+        .mobile-only-content-wrapper div[data-testid="stMultiSelect"],
+        .mobile-only-content-wrapper .stMarkdown,
+        .mobile-only-content-wrapper .stMultiSelect { /* Also target stMultiSelect directly */
             display: none !important;
             visibility: hidden !important; /* Add visibility hidden as a fallback */
             height: 0 !important; /* Collapse space */
+            min-height: 0 !important; /* Ensure min-height is also 0 */
             padding: 0 !important; /* Remove padding */
             margin: 0 !important; /* Remove margin */
+            line-height: 0 !important; /* Collapse line height */
         }
 
 
@@ -284,8 +287,8 @@ with st.container():
     # --- Mobile-only Dropdowns Container (visible above map on mobile, hidden on desktop) ---
     # Use st.container() to give a clear parent for CSS targeting
     with st.container(border=False):
-        # Apply the mobile-only-container class for CSS control
-        st.markdown('<div class="mobile-only-container">', unsafe_allow_html=True)
+        # Apply the mobile-only-content-wrapper class for CSS control
+        st.markdown('<div class="mobile-only-content-wrapper">', unsafe_allow_html=True)
         st.markdown('<div class="mobile-content">', unsafe_allow_html=True)
 
         selected_options_mobile = st.multiselect(
@@ -322,12 +325,11 @@ with st.container():
         )
 
         st.markdown('</div>', unsafe_allow_html=True) # Close mobile-content
-        st.markdown('</div>', unsafe_allow_html=True) # Close mobile-only-container
+        st.markdown('</div>', unsafe_allow_html=True) # Close mobile-only-content-wrapper
 
 
     # --- Desktop-only Dropdowns (within sidebar) ---
     with st.sidebar:
-        # No extra 'desktop-only' div needed here, as the sidebar itself is controlled by CSS
         selected_options_desktop = st.multiselect(
             "Which data layers would you like to download?",
             list(recipe.keys()),
@@ -391,6 +393,7 @@ with st.container():
         st.session_state.selected_filetype = selected_filetype_desktop_val
     else:
         st.session_state.selected_filetype = [] # Ensure it's always set
+
     # ---------------------------------------------------------
     #  Build map and drawing tools
     # ---------------------------------------------------------
