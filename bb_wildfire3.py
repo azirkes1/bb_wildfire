@@ -171,8 +171,8 @@ with st.container():
             "d3386b5e60995da6fff.\n", 
 
             "description": 
-            "The Wildfire Jurisdiction dataset maps the boundaries of agencies responsible for "
-            "wildfire response in Alaska. It is produced by the Bureau of Land Management and the 
+            "The Wildfire Jurisdiction dataset maps the boundaries of agencies responsible for"
+            "wildfire response in Alaska. It is produced by the Bureau of Land Management and the"
             "Alaska Fire Service."
         },
         "Flammability Hazard": {
