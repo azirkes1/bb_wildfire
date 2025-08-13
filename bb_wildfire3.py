@@ -276,10 +276,10 @@ with st.container():
             st.markdown(
                 """
                 <div style='color: #808080; line-height: 1.5;'>
-                    <b>Ownership</b> – Bureau of Land Management<br>
-                    <b>Land Cover</b> – National Land Cover Database<br>
-                    <b>Wildfire Jurisdiction</b> – Bureau of Land Management<br>
-                    <b>Flammability Hazard</b> – University of Alaska – Anchorage<br>
+                    <b>Ownership:</b> Bureau of Land Management<br>
+                    <b>Land Cover:</b> National Land Cover Database<br>
+                    <b>Wildfire Jurisdiction:</b>  Bureau of Land Management<br>
+                    <b>Flammability Hazard:</b> University of Alaska - Anchorage<br>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -299,7 +299,7 @@ with st.container():
                 """,
                 unsafe_allow_html=True
             )
-            
+
     if 'selected_options' not in st.session_state:
         st.session_state.selected_options = []
     if 'selected_filetype' not in st.session_state:
