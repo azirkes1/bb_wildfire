@@ -518,6 +518,7 @@ with st.container():
             # writes metadata to text and returns it
             metadata_lines = [
                 f"Layer: {matched_key}",
+                f"Description: {description}",
                 f"Description: {description}",  # include description
                 f"Credits: {credits}",
                 "Classes:",
