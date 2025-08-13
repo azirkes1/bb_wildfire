@@ -533,7 +533,11 @@ with st.container():
         #     return text.encode("utf-8")
 
         def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
-    
+            st.write("🔥 DEBUG: Function called!")
+            st.write(f"🔥 DEBUG: layer_name = {layer_name}")
+            st.write(f"🔥 DEBUG: recipe type = {type(recipe)}")
+            st.write(f"🔥 DEBUG: recipe keys = {list(recipe.keys()) if recipe else 'None'}")
+            
             # Case-insensitive search for the layer
             matched_key = next(
                 (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
@@ -572,7 +576,6 @@ with st.container():
             st.code(text[:300])
             
             return text.encode("utf-8")
-        
         #function to calculate bounding box from coordinates
         def _min_max_coords(coords): 
                     xs, ys = zip(*coords)
