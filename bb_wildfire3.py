@@ -533,49 +533,52 @@ with st.container():
         #     return text.encode("utf-8")
 
         def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
-            st.write("🔥 DEBUG: Function called!")
-            st.write(f"🔥 DEBUG: layer_name = {layer_name}")
-            st.write(f"🔥 DEBUG: recipe type = {type(recipe)}")
-            st.write(f"🔥 DEBUG: recipe keys = {list(recipe.keys()) if recipe else 'None'}")
-            
-            # Case-insensitive search for the layer
-            matched_key = next(
-                (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
-                None
-            )
-            if matched_key is None:
-                st.write("DEBUG: No matching layer found!")
-                return b""  # return empty if layer not found
+            try:
+                st.write("🔥 DEBUG: Function started!")
+                
+                # Case-insensitive search for the layer
+                matched_key = next(
+                    (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
+                    None
+                )
+                
+                st.write(f"🔥 DEBUG: matched_key = {matched_key}")
+                
+                if matched_key is None:
+                    st.write("🔥 DEBUG: No matching layer found!")
+                    return b""
+                
+                layer_recipe = recipe[matched_key]
+                st.write(f"🔥 DEBUG: Got layer_recipe")
+                
+                description = layer_recipe.get("description", "No description available.")
+                st.write(f"🔥 DEBUG: Got description: {description[:50]}...")
+                
+                credits = layer_recipe.get("credits", "No credits provided.")
+                classes = layer_recipe.get("labels", {})
+                symbology = layer_recipe.get("colors", {})
 
-            st.write(f"DEBUG: Found layer: {matched_key}")
-            layer_recipe = recipe[matched_key]
-            st.write(f"DEBUG: Layer keys: {list(layer_recipe.keys())}")
+                # Build the metadata text
+                metadata_lines = [
+                    f"Layer: {matched_key}",
+                    f"Description: {description}",
+                    f"Credits: {credits}",
+                    "Classes:",
+                    *[f"  - {k}: {v}" for k, v in classes.items()],
+                    "Symbology:",
+                    *[f"  - {k}: RGB{v}" for k, v in symbology.items()]
+                ]
 
-            description = layer_recipe.get("description", "No description available.")
-            st.write(f"DEBUG: Description: {repr(description)[:100]}...")  # Show first 100 chars
-            
-            credits = layer_recipe.get("credits", "No credits provided.")
-            classes = layer_recipe.get("labels", {})
-            symbology = layer_recipe.get("colors", {})
-
-            # Build the metadata text
-            metadata_lines = [
-                f"Layer: {matched_key}",
-                f"Description: {description}",
-                f"Credits: {credits}",
-                "Classes:",
-                *[f"  - {k}: {v}" for k, v in classes.items()],
-                "Symbology:",
-                *[f"  - {k}: RGB{v}" for k, v in symbology.items()]
-            ]
-
-            text = "\n".join(metadata_lines)
-            
-            # Show the first few lines of generated text
-            st.write("DEBUG: First 300 characters of generated text:")
-            st.code(text[:300])
-            
-            return text.encode("utf-8")
+                text = "\n".join(metadata_lines)
+                st.write("🔥 DEBUG: Generated text successfully")
+                return text.encode("utf-8")
+                
+            except Exception as e:
+                st.error(f"🚨 ERROR in generate_text_metadata_file: {e}")
+                st.error(f"🚨 Error type: {type(e)}")
+                import traceback
+                st.error(f"🚨 Traceback: {traceback.format_exc()}")
+                return b""
         #function to calculate bounding box from coordinates
         def _min_max_coords(coords): 
                     xs, ys = zip(*coords)
