@@ -162,7 +162,7 @@ with st.container():
             },
 
             "credits": "Data source: U.S. Department of the Interior, "
-            "Bureau of Land Management, Alaska Fire Service."
+            "Bureau of Land Management, Alaska Fire Service. "
             "Alaska Wildland Fire Jurisdictions (AKWFJ). "
             "Last modified March 3, 2023. ArcGIS Online. "
             "https://www.arcgis.com/home/\n"
