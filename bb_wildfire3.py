@@ -117,8 +117,7 @@ with st.container():
                 "provides comprehensive land cover information for the United States. "
                 "The NLCD is derived from satellite imagery, such as Landsat and has a 30m resolution. "
                 "Additionally, it utilizes a modified Anderson Level II classification system, which categorizes land "
-                "cover into 20 classes such as forests, wetlands, and developed areas.")
-                
+                "cover into 20 classes such as forests, wetlands, and developed areas.")  
             },
 
             "Wildfire Jurisdiction": {
@@ -171,8 +170,8 @@ with st.container():
             "d3386b5e60995da6fff.\n", 
 
             "description": 
-            ("The Wildfire Jurisdiction dataset maps the boundaries of agencies responsible for"
-            "wildfire response in Alaska. It is produced by the Bureau of Land Management and the"
+            ("The Wildfire Jurisdiction dataset maps the boundaries of agencies responsible for "
+            "wildfire response in Alaska. It is produced by the Bureau of Land Management and the "
             "Alaska Fire Service.")
         },
         "Flammability Hazard": {
