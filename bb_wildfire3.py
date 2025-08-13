@@ -249,16 +249,12 @@ with st.container():
         // This script will run in the user's browser to detect screen size
         function detectDeviceType() {
             const isMobile = window.innerWidth <= 768;
-            // Send a message to the Streamlit app to update session state
-            // This relies on Streamlit's ability to receive messages from custom components
-            // or a similar mechanism if an explicit component is not used.
-            // For simplicity, we'll try to directly set the session state through postMessage if possible,
-            // or trigger a rerender that can pick up the state.
             if (window.parent) {
                 window.parent.postMessage({
                     streamlit: {
                         setSessionState: {
-                            is_mobile_detected: isMobile
+                            is_mobile_detected: isMobile,
+                            device_detection_complete: true // New flag to indicate detection has run
                         }
                     }
                 }, '*');
@@ -275,17 +271,35 @@ with st.container():
 
     # Initialize session state for device detection if not already set
     if 'is_mobile_detected' not in st.session_state:
-        st.session_state.is_mobile_detected = False # Default to desktop until JS updates
+        st.session_state.is_mobile_detected = False # Default until JS updates
+
+    if 'device_detection_complete' not in st.session_state:
+        st.session_state.device_detection_complete = False # Default until JS updates
+
+    # --- Force initial rerun if detection is not complete ---
+    # This ensures Streamlit reruns after JS has had a chance to update session_state
+    if not st.session_state.device_detection_complete:
+        # Optional: You can show a loading message here
+        # st.info("Detecting device type... Please wait.")
+        time.sleep(0.1) # Small delay to allow JS message to process
+        st.rerun() # Force a rerun
 
     # --- App Content ---
 
-    # Explanation text, visible on both unless explicitly hidden by media queries
     st.write(
         'This tool allows a user to download relevant wildfire management data layers clipped to a region of interest. ' \
         'Simply select the data layers and data format you are interested in below. Next, draw a boundary on the map by clicking on the rectangle tool in the upper left corner of the map. ' \
         'This will be used as the clipping boundary. ' \
         'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.'
     )
+
+    # Initialize all selected variables to empty lists outside the if/else blocks
+    # This prevents NameError regardless of which block is executed
+    selected_options_mobile = []
+    selected_filetype_mobile = []
+    selected_options_desktop = []
+    selected_filetype_desktop = []
+
 
     # --- Conditional Rendering of Dropdowns ---
 
@@ -374,17 +388,18 @@ with st.container():
         st.session_state.selected_filetype = []
 
     # Get current values from the *active* dropdowns
+    # Use the initialized variables
     current_selected_options = []
     current_selected_filetype = []
 
     if st.session_state.is_mobile_detected:
         # Get values from mobile dropdowns if active
-        current_selected_options = st.session_state.get("mobile_data_layers_select", [])
-        current_selected_filetype = st.session_state.get("mobile_file_format_select", [])
+        current_selected_options = selected_options_mobile
+        current_selected_filetype = selected_filetype_mobile
     else:
         # Get values from desktop dropdowns if active
-        current_selected_options = st.session_state.get("desktop_data_layers_select", [])
-        current_selected_filetype = st.session_state.get("desktop_file_format_select", [])
+        current_selected_options = selected_options_desktop
+        current_selected_filetype = selected_filetype_desktop
 
     # Update the final session state variables
     st.session_state.selected_options = current_selected_options
