@@ -177,25 +177,40 @@ with st.container():
     # ---------------------------------------------------------
     st.markdown("""
     <style>
+    /* Make the Folium iframe and inner map responsive */
     .folium-map, iframe {
-        display: block;
-        border: none !important;
-        width: 100% !important;
+    width: 100% !important;
+    display: block !important;
+    border: none !important;
     }
 
     /* Desktop / landscape */
     @media (min-width: 769px), (orientation: landscape) {
-        .folium-map, iframe {
-            height: 85vh !important;
-        }
+    .folium-map, iframe {
+        height: 88vh !important;  /* tall on desktop */
+        max-height: 88vh !important;
+    }
     }
 
-    /* Mobile portrait: fit screen */
+    /* Mobile portrait: use dynamic viewport so mobile browser chrome doesn't crop */
     @media (max-width: 768px) and (orientation: portrait) {
-        .folium-map, iframe {
-            height: calc(100vh - 40px) !important; /* fits to screen */
-        }
+    .folium-map, iframe {
+        height: 100dvh !important;    /* full visible viewport height */
+        max-height: 100dvh !important;
     }
+    }
+
+    /* Trim padding so the map really can use the whole screen */
+    .main > div:first-child,
+    .main .block-container > div:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    }
+    div[data-testid="block-container"] {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    }
+    footer, .stDeployButton { display: none !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -380,15 +395,51 @@ with st.container():
         }
     ).add_to(m)
 
-    # Inject JS so bounds recalc after iframe resize
-    m.get_root().html.add_child(folium.Element("""
+    refit_js = f"""
     <script>
-    window.addEventListener('load', function() {
-        window.dispatchEvent(new Event('resize'));
-    });
-    </script>
-    """))
+    (function() {{
+    var bounds = L.latLngBounds(
+        [{min_lat}, {min_lon}],
+        [{max_lat}, {max_lon}]
+    );
 
+    function refitAllFoliumMaps() {{
+        // Find Folium Leaflet maps created in this iframe
+        var maps = [];
+        for (var k in window) {{
+        try {{
+            if (window[k] && window[k] instanceof L.Map) {{
+            maps.push(window[k]);
+            }}
+        }} catch(e) {{}}
+        }}
+        // Fallback for older Folium variable names: map_<id>
+        if (!maps.length) {{
+        for (var k in window) {{
+            if (/^map_/.test(k) && window[k] && typeof window[k].invalidateSize === 'function') {{
+            maps.push(window[k]);
+            }}
+        }}
+        }}
+
+        maps.forEach(function(map) {{
+        map.invalidateSize(true);               // tell Leaflet the container size changed
+        map.fitBounds(bounds, {{ padding: [12, 12] }}); // re-center on BBNC
+        }});
+    }}
+
+    // Initial + delayed passes (layout can settle a bit later on mobile)
+    window.addEventListener('load', refitAllFoliumMaps);
+    setTimeout(refitAllFoliumMaps, 150);
+    setTimeout(refitAllFoliumMaps, 500);
+
+    // Handle user rotations/resizes
+    window.addEventListener('resize', refitAllFoliumMaps);
+    window.addEventListener('orientationchange', refitAllFoliumMaps);
+    }})();
+    </script>
+    """
+    m.get_root().html.add_child(folium.Element(refit_js))
     #add layer toggle control
     folium.LayerControl(collapsed=False).add_to(m)
     
