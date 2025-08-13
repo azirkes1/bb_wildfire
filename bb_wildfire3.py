@@ -177,22 +177,19 @@ with st.container():
     # ---------------------------------------------------------
     st.markdown("""
     <style>
-    /* Base Streamlit layout adjustments: Remove unwanted padding/margins */
+    /* Base Streamlit layout adjustments */
     .main > div:first-child,
     .main .block-container > div:first-child {
         margin-top: 0 !important;
         padding-top: 0 !important;
     }
-
     div[data-testid="block-container"] {
         padding-top: 0 !important;
         margin-top: 0 !important;
     }
 
-    /* Hide Streamlit's default footer and deploy button */
-    footer, .stDeployButton {
-        display: none !important;
-    }
+    /* Hide footer/deploy button */
+    footer, .stDeployButton { display: none !important; }
 
     /* Map iframe styling */
     .element-container:has(.folium-map),
@@ -200,57 +197,49 @@ with st.container():
         margin-bottom: 0px !important;
     }
 
-    .folium-map {
-        height: 80vh !important; /* Changed from fixed pixels to viewport height */
-        overflow: hidden !important;
-    }
-
-    iframe {
-        height: 80vh !important; /* Changed from fixed pixels to viewport height */
-        display: block;
-        margin: 0 auto !important;
-        padding: 0 !important;
+    .folium-map, iframe {
+        width: 100% !important;
         border: none !important;
+        display: block;
     }
 
-    /* Adjust sidebar width for desktop */
+    /* Default desktop/landscape height */
+    @media (min-width: 769px) {
+        .folium-map, iframe {
+            height: 80vh !important;
+        }
+    }
+
+    /* Mobile portrait: let it shrink instead of cut off */
+    @media (max-width: 768px) and (orientation: portrait) {
+        .folium-map, iframe {
+            height: auto !important;
+            max-height: 70vh !important; /* ensures it never exceeds visible space */
+            aspect-ratio: 1/1; /* keep roughly square for better fit */
+        }
+    }
+
+    /* Sidebar desktop */
     @media (min-width: 769px) {
         section[data-testid="stSidebar"] {
-            width: 350px !important; /* Set sidebar width for desktop */
-            overflow: auto !important; /* Allow scrolling if content overflows */
-            max-height: none !important;
+            width: 350px !important;
+            overflow: auto !important;
         }
-        /* Ensure sidebar children also handle overflow correctly */
         section[data-testid="stSidebar"] > div {
             overflow: auto !important;
         }
     }
-    /* On mobile, Streamlit handles hiding the sidebar by default and providing the hamburger menu.
-    No explicit CSS display:none is needed for the sidebar on mobile here, as Streamlit manages it.*/
 
-    /* Custom style for the mobile-like content which is now just informational, not interactive */
-    .mobile-content {
-        background-color: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    /* Style for the hamburger menu icon to make it more visible */
-    /* Target the button that toggles the sidebar and its SVG icon */
+    /* Sidebar toggle icon */
     [data-testid="stSidebarToggle"] svg {
-        fill: #000000 !important; /* Make the icon black for strong contrast */
-        background-color: #f0f2f6; /* Light gray background behind the icon */
-        border-radius: 5px; /* Slightly rounded corners for the background */
-        padding: 3px; /* Add some padding around the icon */
+        fill: #000 !important;
+        background-color: #f0f2f6;
+        border-radius: 5px;
+        padding: 3px;
     }
-
-    /* Also target the parent button itself for background on hover/active if needed */
     [data-testid="stSidebarToggle"] {
-        background-color: transparent !important; /* Ensure button background doesn't interfere */
+        background-color: transparent !important;
     }
-
     </style>
     """, unsafe_allow_html=True)
 
