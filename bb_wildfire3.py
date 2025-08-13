@@ -502,6 +502,7 @@ with st.container():
     
         def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
          # Case-insensitive search for the layer
+            # Case-insensitive search for the layer
             matched_key = next(
                 (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
                 None
@@ -516,13 +517,19 @@ with st.container():
             classes = layer_recipe.get("labels", {})
             symbology = layer_recipe.get("colors", {})
 
-            # Build the metadata text
+            # Build the metadata text with lines around the title
             metadata_lines = [
+                "=" * 20,
                 f"Layer: {matched_key}",
+                "=" * 20,
+                "",
                 f"Description: {description}",
+                "",
                 f"Credits: {credits}",
+                "",
                 "Classes:",
                 *[f"  - {k}: {v}" for k, v in classes.items()],
+                "",
                 "Symbology:",
                 *[f"  - {k}: RGB{v}" for k, v in symbology.items()]
             ]
