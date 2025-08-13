@@ -217,7 +217,7 @@ with st.container():
     # ---------------------------------------------------------
     #  App content
     # ---------------------------------------------------------
-    st.title('Bristol Bay Wildfire Management Data Tool')
+    st.markdown("### Bristol Bay Wildfire Management Data Tool")
     # Explanation text - visible on both mobile and desktop
     st.write(
         'The goal of this tool is to make wildfire managment data layers more accessible and easier to use by cropping data to your area of interest and mapping the data. ' \
