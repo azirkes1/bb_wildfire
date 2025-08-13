@@ -253,15 +253,15 @@ with st.container():
         """
         <div style='color: #808080; overflow: hidden; white-space: normal; word-wrap: break-word; margin-bottom: 15px;'>
             <u>Data Sources:</u><br><br>
-            Ownership - <b>Bureau of Land Management</b><br>
-            Land cover - <b>National Land Cover Database</b><br>
-            Wildfire Jurisdiction - <b>Bureau of Land Management</b><br>
-            Flammability Hazard - <b>University of Alaska - Anchorage</b><br>
+            <b>Ownership</b> - Bureau of Land Management<br>
+            <b>Land cover</b> - National Land Cover Database<br>
+            <b>Wildfire Jurisdiction</b> - Bureau of Land Management<br>
+            <b>Flammability Hazard</b> - University of Alaska - Anchorage<br>
         </div>
         """,
         unsafe_allow_html=True
     )
-        
+            
         selected_filetype = st.multiselect(
             "What format do you want the data in?",
             ['.tif', '.pdf'],
