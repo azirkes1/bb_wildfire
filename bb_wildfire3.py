@@ -56,7 +56,7 @@ credentials = ee.ServiceAccountCredentials(service_account, key_data=json_object
 ee.Initialize(credentials)
 
 # ---------------------------------------------------------
-#  streamlit app layout
+# Data Recipe
 # ---------------------------------------------------------
 
 #everything resides in this container, helps to reduce padding
@@ -171,11 +171,10 @@ with st.container():
                     "Alaska Natural Resource Management. Accessed April 01, 2025. "
                     "https://alaskanrm.com/wildfire-exposure/."
         }}
-    # Alternative approach: Create mobile-specific content
-
-
-# --- Custom CSS for Responsive Layout ---
-# This CSS will hide/show elements based on screen width
+    
+    # ---------------------------------------------------------
+    #  CSS for Layout
+    # ---------------------------------------------------------
     st.markdown("""
     <style>
     /* Base Streamlit layout adjustments: Remove unwanted padding/margins */
@@ -191,7 +190,6 @@ with st.container():
     }
 
     /* Hide Streamlit's default footer and deploy button */
-    /* IMPORTANT: Removed 'header' from this list to ensure the main Streamlit header (containing the hamburger menu) is visible */
     footer, .stDeployButton {
         display: none !important;
     }
@@ -227,10 +225,8 @@ with st.container():
             overflow: auto !important;
         }
     }
-    /* On mobile, Streamlit handles hiding the sidebar by default and providing the hamburger menu.
-    No explicit CSS display:none is needed for the sidebar on mobile here, as Streamlit manages it.*/
 
-    /* Custom style for the mobile-like content which is now just informational, not interactive */
+    /* Custom style for the mobile-like content  */
     .mobile-content {
         background-color: #f8f9fa;
         border: 1px solid #e9ecef;
@@ -256,9 +252,10 @@ with st.container():
     </style>
     """, unsafe_allow_html=True)
 
-    # --- App Content ---
+    # ---------------------------------------------------------
+    #  App Content
+    # ---------------------------------------------------------
 
-    # Explanation text - visible on both mobile and desktop
     st.write(
         'This tool allows a user to download relevant wildfire management data layers clipped to a region of interest. ' \
         'Simply select the data layers and data format you are interested in below. Next, draw a boundary on the map by clicking on the rectangle tool in the upper left corner of the map. ' \
@@ -266,11 +263,7 @@ with st.container():
         'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.'
     )
 
-    # --- Unified Dropdowns in Sidebar (Desktop and Mobile) ---
-    # All interactive selections are placed here.
-    # On desktop, this sidebar is always visible.
-    # On mobile, Streamlit hides this sidebar by default and provides a hamburger menu (☰)
-    # for the user to open it. This makes it "inherently safe for mobile."
+    # --- Dropdowns in Sidebar  ---
     with st.sidebar:
         st.header("Data Selection Options") # Added a header for clarity
 
@@ -307,18 +300,17 @@ with st.container():
             unsafe_allow_html=True
         )
 
-    # --- Sync the selected values for your application logic ---
-    # Since there's only one set of dropdowns, we directly use their values.
     # Initialize session state if not already present
     if 'selected_options' not in st.session_state:
         st.session_state.selected_options = []
     if 'selected_filetype' not in st.session_state:
         st.session_state.selected_filetype = []
 
-    # Directly assign values from the unified dropdowns in the sidebar
+    # Directly assign values from the dropdowns in the sidebar
     st.session_state.selected_options = st.session_state.get("data_layers_select", [])
     st.session_state.selected_filetype = st.session_state.get("file_format_select", [])
-        # ---------------------------------------------------------
+
+    # ---------------------------------------------------------
     #  Build map and drawing tools
     # ---------------------------------------------------------
 
@@ -337,7 +329,7 @@ with st.container():
         return True
 
     #create folium map 
-    m = folium.Map(location=[58.5, -157],control_scale = True, zoom_start=6, attr_control=False)
+    m = folium.Map(location=[59.4, -156.86],control_scale = True, zoom_start=6, attr_control=False)
     
     #add satellite imagery 
     folium.TileLayer(
