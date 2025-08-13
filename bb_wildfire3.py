@@ -175,7 +175,7 @@ with st.container():
     # ---------------------------------------------------------
     #  CSS for Layout
     # ---------------------------------------------------------
-   st.markdown("""
+    st.markdown("""
     <style>
     .folium-map, iframe {
         display: block;
