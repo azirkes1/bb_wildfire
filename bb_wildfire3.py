@@ -242,13 +242,20 @@ with st.container():
     /* Media query for Desktop devices (min-width 769px) */
     @media (min-width: 769px) {
         .mobile-only-container {
-            display: none !important; /* Hide mobile content */
+            display: none !important; /* Hide mobile content container */
         }
-        /* Explicitly hide the Streamlit multiselect and markdown elements within the mobile container on desktop */
+        /* IMPORTANT FIX: Explicitly hide the Streamlit multiselect and markdown elements
+        when they are descendants of the mobile container on desktop.
+        This overrides Streamlit's default rendering behavior. */
         .mobile-only-container div[data-testid="stMultiSelect"],
         .mobile-only-container .stMarkdown {
             display: none !important;
+            visibility: hidden !important; /* Add visibility hidden as a fallback */
+            height: 0 !important; /* Collapse space */
+            padding: 0 !important; /* Remove padding */
+            margin: 0 !important; /* Remove margin */
         }
+
 
         section[data-testid="stSidebar"] {
             display: block !important; /* Show sidebar on desktop */
@@ -384,7 +391,6 @@ with st.container():
         st.session_state.selected_filetype = selected_filetype_desktop_val
     else:
         st.session_state.selected_filetype = [] # Ensure it's always set
-
     # ---------------------------------------------------------
     #  Build map and drawing tools
     # ---------------------------------------------------------
