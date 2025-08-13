@@ -566,9 +566,9 @@ with st.container():
         st.write("="*50)
         st.write("Now test with your actual recipe data and layer name")
         # Uncomment and run with your actual data:
-        # result = generate_text_metadata_file(your_recipe, "your_layer_name")
-        # st.write("Actual result:")
-        # st.code(result.decode('utf-8'))
+        result = generate_text_metadata_file(recipe, "Wildfire Jurisdiction")
+         st.write("Actual result:")
+        st.code(result.decode('utf-8'))
         
         #function to calculate bounding box from coordinates
         def _min_max_coords(coords): 
