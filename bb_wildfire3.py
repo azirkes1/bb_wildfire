@@ -186,15 +186,14 @@ with st.container():
     /* Desktop / landscape */
     @media (min-width: 769px), (orientation: landscape) {
         .folium-map, iframe {
-            height: 60vh !important; 
+            height: 85vh !important;
+        }
     }
 
-    /* Mobile portrait: fill almost full screen */
+    /* Mobile portrait: fit screen */
     @media (max-width: 768px) and (orientation: portrait) {
         .folium-map, iframe {
-            height: calc(100vh - 40px) !important; /* minus header space */
-            width: 100% !important;
-            max-width: 100% !important;
+            height: calc(100vh - 40px) !important; /* fits to screen */
         }
     }
     </style>
@@ -380,6 +379,15 @@ with st.container():
             'fillOpacity': 0,
         }
     ).add_to(m)
+
+    # Inject JS so bounds recalc after iframe resize
+    m.get_root().html.add_child(folium.Element("""
+    <script>
+    window.addEventListener('load', function() {
+        window.dispatchEvent(new Event('resize'));
+    });
+    </script>
+    """))
 
     #add layer toggle control
     folium.LayerControl(collapsed=False).add_to(m)
