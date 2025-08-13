@@ -250,17 +250,19 @@ with st.container():
         )
         
         st.markdown(
-            """
-            <div style='color: #808080; overflow: hidden; white-space: normal; word-wrap: break-word; margin-bottom: 15px;'>
-                <u>Data Sources<br>
-                <u>Ownership</u> - Bureau of Land Management<br>
-                <u>Land cover</u> - National Land Cover Database<br>
-                <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
-                <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
+        """
+        <div style='color: #808080; line-height: 1.5; margin-bottom: 20px;'>
+            <u style='font-size:16px;'>Data Sources:</u><br><br>
+            <div style='margin-left:10px;'>
+                <b>Ownership</b> - Bureau of Land Management<br>
+                <b>Land cover</b> - National Land Cover Database<br>
+                <b>Wildfire Jurisdiction</b> - Bureau of Land Management<br>
+                <b>Flammability Hazard</b> - University of Alaska - Anchorage<br>
             </div>
-            """,
-            unsafe_allow_html=True
-        )
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
         
         selected_filetype = st.multiselect(
             "What format do you want the data in?",
