@@ -501,30 +501,54 @@ with st.container():
         # ---------------------------------------------------------
         
         #function to get metadata for layer and write it to text 
-        # Test script to debug the metadata generation issue
+        # def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
+            
+        #     # Case-insensitive search for the layer
+        #     matched_key = next(
+        #         (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
+        #         None
+        #     )
+        #     if matched_key is None:
+        #         return b""  # return empty if layer not found
+
+        #     layer_recipe = recipe[matched_key]
+
+        #     description = layer_recipe.get("description", "No description available.")
+        #     credits = layer_recipe.get("credits", "No credits provided.")
+        #     classes = layer_recipe.get("labels", {})
+        #     symbology = layer_recipe.get("colors", {})
+
+        #     # Build the metadata text
+        #     metadata_lines = [
+        #         f"Layer: {matched_key}",
+        #         f"Description: {description}",
+        #         f"Credits: {credits}",
+        #         "Classes:",
+        #         *[f"  - {k}: {v}" for k, v in classes.items()],
+        #         "Symbology:",
+        #         *[f"  - {k}: RGB{v}" for k, v in symbology.items()]
+        #     ]
+
+        #     text = "\n".join(metadata_lines)
+        #     return text.encode("utf-8")
 
         def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
-            st.write(f"DEBUG: Looking for layer: '{layer_name}'")
-            st.write(f"DEBUG: Available layers: {list(recipe.keys())}")
-            
+    
             # Case-insensitive search for the layer
             matched_key = next(
                 (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
                 None
             )
-            
             if matched_key is None:
-                st.write(f"DEBUG: No layer found matching '{layer_name}'")
+                st.write("DEBUG: No matching layer found!")
                 return b""  # return empty if layer not found
 
-            st.write(f"DEBUG: Found matching layer: '{matched_key}'")
+            st.write(f"DEBUG: Found layer: {matched_key}")
             layer_recipe = recipe[matched_key]
-            st.write(f"DEBUG: Layer data keys: {list(layer_recipe.keys())}")
-            
+            st.write(f"DEBUG: Layer keys: {list(layer_recipe.keys())}")
+
             description = layer_recipe.get("description", "No description available.")
-            st.write(f"DEBUG: Description type: {type(description)}")
-            st.write(f"DEBUG: Description repr: {repr(description)}")
-            st.write(f"DEBUG: Description length: {len(str(description))}")
+            st.write(f"DEBUG: Description: {repr(description)[:100]}...")  # Show first 100 chars
             
             credits = layer_recipe.get("credits", "No credits provided.")
             classes = layer_recipe.get("labels", {})
@@ -532,8 +556,8 @@ with st.container():
 
             # Build the metadata text
             metadata_lines = [
-                f"Description: {description}",
                 f"Layer: {matched_key}",
+                f"Description: {description}",
                 f"Credits: {credits}",
                 "Classes:",
                 *[f"  - {k}: {v}" for k, v in classes.items()],
@@ -542,33 +566,12 @@ with st.container():
             ]
 
             text = "\n".join(metadata_lines)
-            st.write(f"DEBUG: First 500 characters of generated text:")
-            st.write(text[:500])
-            st.write(f"DEBUG: Full text length: {len(text)}")
+            
+            # Show the first few lines of generated text
+            st.write("DEBUG: First 300 characters of generated text:")
+            st.code(text[:300])
             
             return text.encode("utf-8")
-
-        # Test with a simple example
-        test_recipe = {
-            "Test Layer": {
-                "description": "This is a test description",
-                "credits": "Test credits",
-                "labels": {1: "Class 1", 2: "Class 2"},
-                "colors": {1: (255, 0, 0), 2: (0, 255, 0)}
-            }
-        }
-
-        st.write("=== TESTING WITH SIMPLE EXAMPLE ===")
-        result = generate_text_metadata_file(test_recipe, "Test Layer")
-        st.write("Final result:")
-        st.code(result.decode('utf-8'))
-
-        st.write("="*50)
-        st.write("Now test with your actual recipe data and layer name")
-        # Uncomment and run with your actual data:
-        result = generate_text_metadata_file(recipe, "Wildfire Jurisdiction")
-        st.write("Actual result:")
-        st.code(result.decode('utf-8'))
         
         #function to calculate bounding box from coordinates
         def _min_max_coords(coords): 
