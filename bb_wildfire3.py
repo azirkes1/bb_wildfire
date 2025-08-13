@@ -82,7 +82,7 @@ with st.container():
                 "datasets/BLM-EGIS::blm-ak \n"
                 "-administered-lands/about.", 
 
-                "description":  = (
+                "description": (
                 "The BLM AK Administered Lands dataset details the owner and boundaries of lands across Alaska. "
                 "It provides high-resolution spatial data that is critical for wildfire management, "
                 "including planning fuel treatments, coordinating response strategies, and assessing fire risk "
