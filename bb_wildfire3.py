@@ -177,7 +177,7 @@ with st.container():
     # ---------------------------------------------------------
     st.markdown("""
     <style>
-    /* Base Streamlit layout adjustments */
+    /* Base layout adjustments */
     .main > div:first-child,
     .main .block-container > div:first-child {
         margin-top: 0 !important;
@@ -191,54 +191,34 @@ with st.container():
     /* Hide footer/deploy button */
     footer, .stDeployButton { display: none !important; }
 
-    /* Map iframe styling */
+    /* Map iframe default styles */
     .element-container:has(.folium-map),
     iframe {
         margin-bottom: 0px !important;
     }
 
     .folium-map, iframe {
-        width: 100% !important;
-        border: none !important;
         display: block;
+        border: none !important;
+        width: 100% !important;
     }
 
-    /* Default desktop/landscape height */
-    @media (min-width: 769px) {
+    /* Desktop / landscape */
+    @media (min-width: 769px), (orientation: landscape) {
         .folium-map, iframe {
             height: 80vh !important;
+            width: 100% !important;
         }
     }
 
-    /* Mobile portrait: let it shrink instead of cut off */
+    /* Mobile portrait: shrink width & height proportionally */
     @media (max-width: 768px) and (orientation: portrait) {
         .folium-map, iframe {
-            height: auto !important;
-            max-height: 70vh !important; /* ensures it never exceeds visible space */
-            aspect-ratio: 1/1; /* keep roughly square for better fit */
+            width: 100% !important;    /* container width */
+            max-width: 100% !important; /* never overflow */
+            height: auto !important;   /* auto height keeps ratio */
+            max-height: 70vh !important;
         }
-    }
-
-    /* Sidebar desktop */
-    @media (min-width: 769px) {
-        section[data-testid="stSidebar"] {
-            width: 350px !important;
-            overflow: auto !important;
-        }
-        section[data-testid="stSidebar"] > div {
-            overflow: auto !important;
-        }
-    }
-
-    /* Sidebar toggle icon */
-    [data-testid="stSidebarToggle"] svg {
-        fill: #000 !important;
-        background-color: #f0f2f6;
-        border-radius: 5px;
-        padding: 3px;
-    }
-    [data-testid="stSidebarToggle"] {
-        background-color: transparent !important;
     }
     </style>
     """, unsafe_allow_html=True)
