@@ -117,7 +117,7 @@ with st.container():
                 "provides comprehensive land cover information for the United States. "
                 "The NLCD is derived from satellite imagery, such as Landsat and has a 30m resolution. "
                 "Additionally, it utilizes a modified Anderson Level II classification system, which categorizes land "
-                "cover into 20 classes such as forests, wetlands, and developed areas. 
+                "cover into 20 classes such as forests, wetlands, and developed areas." 
                 
             },
 
