@@ -214,13 +214,15 @@ with st.container():
     </style>
     """, unsafe_allow_html=True)
 
-    # --- App Content ---
+    # ---------------------------------------------------------
+    #  App content
+    # ---------------------------------------------------------
 
     # Explanation text - visible on both mobile and desktop
     st.write(
-        'This tool allows a user to download relevant wildfire management data layers clipped to a region of interest. ' \
-        'Simply select the data layers and data format you are interested in below. Next, draw a boundary on the map by clicking on the rectangle tool in the upper left corner of the map. ' \
-        'This will be used as the clipping boundary. ' \
+        'The goal of this tool is to make wildfire managment data layers more accessible and easier to use by clipping data to your area of interest and mapping the data.' \
+        'Begin by selecting the data layers and data format you are interested  (if on a phone, click the arrows in the upper left). ' \
+        'Next, draw a boundary on the map by clicking on the rectangle tool in the upper left corner of the map. ' \
         'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.'
     )
 
