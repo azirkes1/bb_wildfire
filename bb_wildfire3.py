@@ -504,22 +504,24 @@ with st.container():
         def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes: 
 
             # attempts to find layer_name in recipe keys
-            matched_key = next((k for k in recipe if k.strip().lower() == layer_name.strip().lower()), None) 
+            matched_key = next(
+                (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
+                None
+            )
             if matched_key is None:
-                return b""  # return empty bytes 
+                return b""  # return empty bytes if not found
 
-            # get metadata for the layer
-            layer_recipe = recipe.get(matched_key, {}) 
+            # Get metadata for the layer
+            layer_recipe = recipe.get(matched_key, {})
             classes = layer_recipe.get("labels", {})
             credits = layer_recipe.get("credits", "")
             symbology = layer_recipe.get("colors", {})
             description = layer_recipe.get("description", "No description available.")
 
-            # writes metadata to text and returns it
+            # Build metadata lines
             metadata_lines = [
                 f"Layer: {matched_key}",
                 f"Description: {description}",
-                f"Description: {description}",  # include description
                 f"Credits: {credits}",
                 "Classes:",
                 *[f"  - {k}: {v}" for k, v in classes.items()],
@@ -527,9 +529,9 @@ with st.container():
                 *[f"  - {k}: RGB{v}" for k, v in symbology.items()]
             ]
 
+            # Join lines and encode as UTF-8
             text = "\n".join(metadata_lines)
             return text.encode("utf-8")
-        
         #function to calculate bounding box from coordinates
         def _min_max_coords(coords): 
                     xs, ys = zip(*coords)
