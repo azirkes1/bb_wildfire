@@ -567,7 +567,7 @@ with st.container():
         st.write("Now test with your actual recipe data and layer name")
         # Uncomment and run with your actual data:
         result = generate_text_metadata_file(recipe, "Wildfire Jurisdiction")
-         st.write("Actual result:")
+        st.write("Actual result:")
         st.code(result.decode('utf-8'))
         
         #function to calculate bounding box from coordinates
