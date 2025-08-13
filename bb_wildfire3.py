@@ -502,42 +502,42 @@ with st.container():
         
         
 
-       def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
-        try:
-            st.write("🔥🔥🔥 THIS IS THE CORRECT DEBUG FUNCTION VERSION 🔥🔥🔥")
-            
-            # Case-insensitive search for the layer
-            matched_key = next(
-                (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
-                None
-            )
-            
-            if matched_key is None:
+        def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
+            try:
+                st.write("🔥🔥🔥 THIS IS THE CORRECT DEBUG FUNCTION VERSION 🔥🔥🔥")
+                
+                # Case-insensitive search for the layer
+                matched_key = next(
+                    (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
+                    None
+                )
+                
+                if matched_key is None:
+                    return b""
+                
+                layer_recipe = recipe[matched_key]
+                description = layer_recipe.get("description", "No description available.")
+                credits = layer_recipe.get("credits", "No credits provided.")
+                classes = layer_recipe.get("labels", {})
+                symbology = layer_recipe.get("colors", {})
+
+                # Build the metadata text
+                metadata_lines = [
+                    f"Layer: {matched_key}",
+                    f"Description: {description}",
+                    f"Credits: {credits}",
+                    "Classes:",
+                    *[f"  - {k}: {v}" for k, v in classes.items()],
+                    "Symbology:",
+                    *[f"  - {k}: RGB{v}" for k, v in symbology.items()]
+                ]
+
+                text = "\n".join(metadata_lines)
+                return text.encode("utf-8")
+                
+            except Exception as e:
+                st.error(f"🚨 ERROR: {e}")
                 return b""
-            
-            layer_recipe = recipe[matched_key]
-            description = layer_recipe.get("description", "No description available.")
-            credits = layer_recipe.get("credits", "No credits provided.")
-            classes = layer_recipe.get("labels", {})
-            symbology = layer_recipe.get("colors", {})
-
-            # Build the metadata text
-            metadata_lines = [
-                f"Layer: {matched_key}",
-                f"Description: {description}",
-                f"Credits: {credits}",
-                "Classes:",
-                *[f"  - {k}: {v}" for k, v in classes.items()],
-                "Symbology:",
-                *[f"  - {k}: RGB{v}" for k, v in symbology.items()]
-            ]
-
-            text = "\n".join(metadata_lines)
-            return text.encode("utf-8")
-            
-        except Exception as e:
-            st.error(f"🚨 ERROR: {e}")
-            return b""
         #function to calculate bounding box from coordinates
         def _min_max_coords(coords): 
                     xs, ys = zip(*coords)
@@ -847,34 +847,6 @@ with st.container():
         # ---------------------------------------------------------
         #  set up TIF helper functions 
         # ---------------------------------------------------------
-        
-        #function to write metadata dext file 
-        def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
-            matched_key = next((k for k in recipe if k.strip().lower() == layer_name.strip().lower()), None)
-            if matched_key is None:
-                return b""  # Return empty bytes
-
-            layer_recipe = recipe.get(matched_key, {})
-            classes = layer_recipe.get("labels", {})
-            credits = layer_recipe.get("credits", "")
-            symbology = layer_recipe.get("colors", {})
-
-            metadata_lines = [
-                "=" * 20,
-                f"Layer: {matched_key}",
-                "=" * 20,
-                f"Credits: {credits or 'N/A'}",
-                "",
-                "Classes:",
-                *[f"  - {k}: {v}" for k, v in classes.items()],
-                "",
-                "Symbology:",
-                *[f"  - {k}: RGB{v}" for k, v in symbology.items()],
-                ""  # final line break
-            ]
-
-            text = "\n".join(metadata_lines)
-            return text.encode("utf-8")
         
         #function to extract tif from GEE zip file 
         def extract_tif_from_zip(zip_bytes):
