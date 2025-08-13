@@ -173,328 +173,134 @@ with st.container():
         }}
     # Alternative approach: Create mobile-specific content
 
-# Add this JavaScript to detect mobile and only show mobile content when needed
-    mobile_detection = """
-    <style>
-    /* Remove the white bar completely */
-    .main > div:first-child,
-    .main .block-container > div:first-child {
-        margin-top: 0 !important;
-        padding-top: 0 !important;
-    }
+# --- CSS and JS for device detection and styling ---
+st.markdown("""
+<style>
+/* Streamlit's main block container */
+.block-container {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
 
-    /* Force remove any top spacing */
-    div[data-testid="block-container"] {
-        padding-top: 0 !important;
-        margin-top: 0 !important;
-    }
+/* Hide header and footer */
+footer, header, .stDeployButton {
+    display: none !important;
+}
 
-    /* Remove the 20px height div you added */
-    div[style*="height:20px"] {
-        display: none !important;
-    }
-
-    /* Hide mobile content on desktop by default */
-    .mobile-only {
-        display: none !important;
-    }
-
-    /* Show mobile content only on mobile */
-    @media (max-width: 768px) {
-        .mobile-only {
-            display: block !important;
-        }
-        
-        /* Hide sidebar on mobile */
-        section[data-testid="stSidebar"] {
-            display: none !important;
-        }
-    }
-
-    /* Desktop styles - ensure sidebar is visible */
-    @media (min-width: 769px) {
-        .mobile-only {
-            display: none !important;
-        }
-        
-        section[data-testid="stSidebar"] {
-            display: block !important;
-            width: 350px !important;
-        }
-    }
-
-    /* Style mobile content */
-    .mobile-content {
-        background-color: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    /* Your existing styles... */
-    .element-container:has(.folium-map),
-    iframe {
-        margin-bottom: 0px !important;
-    }
-
-    .folium-map {
-        height: 500px !important;
-        overflow: hidden !important;
-    }
-
-    footer, header, .stDeployButton {
-        display: none !important;
-    }
-
-    iframe {
-        height: 500px !important;
-        display: block;
-        margin: 0 auto !important;
-        padding: 0 !important;
-        border: none !important;
-    }
-
-    .element-container:has(.folium-map),
-    .block-container,
-    .main {
-        padding-bottom: 0 !important;
-        margin-bottom: 0 !important;
-    }
-    </style>
-
-    <script>
-    function updateMobileLayout() {
-        const isMobile = window.innerWidth <= 768;
-        
-        if (isMobile) {
-            // Show mobile content
-            const mobileElements = document.querySelectorAll('.mobile-only');
-            mobileElements.forEach(el => {
-                el.style.display = 'block';
-            });
-            
-            // Hide sidebar
-            const sidebar = document.querySelector('section[data-testid="stSidebar"]');
-            if (sidebar) {
-                sidebar.style.display = 'none';
-            }
-        } else {
-            // Hide mobile content on desktop
-            const mobileElements = document.querySelectorAll('.mobile-only');
-            mobileElements.forEach(el => {
-                el.style.display = 'none';
-            });
-            
-            // Show sidebar
-            const sidebar = document.querySelector('section[data-testid="stSidebar"]');
-            if (sidebar) {
-                sidebar.style.display = 'block';
-            }
-        }
-    }
-
-    // Run on load and resize
-    window.addEventListener('load', function() {
-        setTimeout(updateMobileLayout, 100);
-    });
-    window.addEventListener('resize', updateMobileLayout);
-    // Run immediately
-    setTimeout(updateMobileLayout, 100);
-    </script>
-    """
-
-    # Updated CSS with mobile detection
-    st.markdown(mobile_detection, unsafe_allow_html=True)
-
-    st.markdown("""
-    <style>
-    /* Remove the white bar at top */
-    .main > div:first-child {
-        padding-top: 0 !important;
-        margin-top: 0 !important;
-    }
-
-    /* Remove initial spacing */
-    .block-container {
-        padding-top: 0.5rem !important;
-        padding-bottom: 0.5rem !important;
-        margin-top: 0 !important;
-    }
-
-    /* Hide mobile content on desktop by default */
-    .mobile-only {
-        display: none !important;
-    }
-
-    /* Hide desktop-only content on mobile */
-    .mobile-device .desktop-only {
-        display: none !important;
-    }
-
-    .mobile-device .mobile-only {
-        display: block !important;
-    }
-
-    /* Ensure sidebar is hidden on mobile */
-    .mobile-device section[data-testid="stSidebar"] {
-        display: none !important;
-    }
-
-    /* Style mobile content */
-    .mobile-content {
-        background-color: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    /* Desktop sidebar styling */
-    .desktop-device section[data-testid="stSidebar"] {
-        overflow: hidden !important;
-        max-height: none !important;
+/* Custom CSS for desktop */
+@media (min-width: 769px) {
+    section[data-testid="stSidebar"] {
         width: 350px !important;
     }
+}
 
-    .desktop-device section[data-testid="stSidebar"] > div {
-        overflow: hidden !important;
-    }
-
-    /* Your existing styles... */
-    .element-container:has(.folium-map),
-    iframe {
-        margin-bottom: 0px !important;
-    }
-
-    .folium-map {
-        height: 500px !important;
-        overflow: hidden !important;
-    }
-
-    footer, header, .stDeployButton {
+/* Custom CSS for mobile */
+@media (max-width: 768px) {
+    section[data-testid="stSidebar"] {
         display: none !important;
     }
+}
+</style>
+""", unsafe_allow_html=True)
 
-    iframe {
-        height: 500px !important;
-        display: block;
-        margin: 0 auto !important;
-        padding: 0 !important;
-        border: none !important;
+# --- JavaScript to detect device and set session state ---
+st.markdown("""
+<script>
+    function getMobileState() {
+        const isMobile = window.innerWidth <= 768;
+        window.parent.postMessage({
+            type: 'streamlit:set_session_state',
+            key: 'is_mobile',
+            value: isMobile
+        }, '*');
     }
+    window.addEventListener('load', getMobileState);
+    window.addEventListener('resize', getMobileState);
+    getMobileState(); // Run on initial load
+</script>
+""", unsafe_allow_html=True)
 
-    .element-container:has(.folium-map),
-    .block-container,
-    .main {
-        padding-bottom: 0 !important;
-        margin-bottom: 0 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+# Wait for the session state to be set
+if 'is_mobile' not in st.session_state:
+    st.stop()
 
-    # Mobile-only content (appears at top on mobile)
-    st.markdown('<div class="mobile-only">', unsafe_allow_html=True)
+# --- Main App Logic ---
+
+# Define your data layers and file types
+recipe = {
+    "Ownership": "...",
+    "Land cover": "...",
+    "Wildfire Jurisdiction": "...",
+    "Flammability Hazard": "..."
+}
+options_filetype = ['.tif', '.pdf']
+
+# Conditionally place the widgets
+if st.session_state.is_mobile:
+    st.write('This tool allows a user to download relevant wildfire management data layers clipped to a region of interest. ' \
+             'Simply select the data layers and data format you are interested in below. Next, draw a boundary on the map by clicking on the rectangle tool in the upper left corner of the map. ' \
+             'This will be used as the clipping boundary. ' \
+             'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.')
+
     st.markdown('<div class="mobile-content">', unsafe_allow_html=True)
 
-    # Mobile version of your sidebar content
-    selected_options_mobile = st.multiselect(
+    # Widgets for mobile version
+    selected_options = st.multiselect(
         "Which data layers would you like to download?",
         list(recipe.keys()),
-        key="mobile_data_layers"
+        key="data_layers"
     )
 
-    st.markdown(
-        """
+    st.markdown("""
         <div style='color: #808080; margin-bottom: 15px;'>
             <u>Ownership</u> - Bureau of Land Management<br>
             <u>Land cover</u> - National Land Cover Database<br>
             <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
             <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+    """, unsafe_allow_html=True)
 
-    selected_filetype_mobile = st.multiselect(
+    selected_filetype = st.multiselect(
         "What format do you want the data in?",
-        ['.tif', '.pdf'],
-        key="mobile_file_format"
+        options_filetype,
+        key="file_format"
     )
 
-    st.markdown(
-        """
+    st.markdown("""
         <div style='color: #808080; margin-bottom: 15px;'>
             PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+    """, unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
-    # Regular sidebar (hidden on mobile)
+else: # Desktop version
+    # Widgets in the sidebar
     with st.sidebar:
         selected_options = st.multiselect(
             "Which data layers would you like to download?",
             list(recipe.keys()),
-            key="desktop_data_layers"
+            key="data_layers"
         )
-        
-        st.markdown(
-            """
-            <div style='color: #808080; overflow: hidden;
-            white-space: normal;
-            word-wrap: break-word;
-            margin-bottom: 15px;'>
+        st.markdown("""
+            <div style='color: #808080; margin-bottom: 15px;'>
                 <u>Ownership</u> - Bureau of Land Management<br>
                 <u>Land cover</u> - National Land Cover Database<br>
                 <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
                 <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
             </div>
-            """,
-            unsafe_allow_html=True
-        )
-        
+        """, unsafe_allow_html=True)
+
         selected_filetype = st.multiselect(
             "What format do you want the data in?",
-            ['.tif', '.pdf'],
-            key="desktop_file_format"
+            options_filetype,
+            key="file_format"
         )
-        
-        st.markdown(
-            """
-            <div style='color: #808080;  overflow: hidden;
-            white-space: normal;
-            word-wrap: break-word;
-            margin-bottom: 15px;'>
+        st.markdown("""
+            <div style='color: #808080; margin-bottom: 15px;'>
                 PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
-                
             </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    # Sync the values between mobile and desktop
-    # Combine values from both versions to handle the mobile error
-    if 'mobile_data_layers' in st.session_state and st.session_state.mobile_data_layers:
-        final_selected_options = st.session_state.mobile_data_layers
-    elif 'desktop_data_layers' in st.session_state and st.session_state.desktop_data_layers:
-        final_selected_options = st.session_state.desktop_data_layers
-    else:
-        final_selected_options = []
-
-    if 'mobile_file_format' in st.session_state and st.session_state.mobile_file_format:
-        final_selected_filetype = st.session_state.mobile_file_format
-    elif 'desktop_file_format' in st.session_state and st.session_state.desktop_file_format:
-        final_selected_filetype = st.session_state.desktop_file_format
-    else:
-        final_selected_filetype = []
-
-    # Store the final values in session state for use throughout the app
-    st.session_state.selected_options = final_selected_options
-    st.session_state.selected_filetype = final_selected_filetype
+        """, unsafe_allow_html=True)
     # ---------------------------------------------------------
     #  define metadata - title, ee_image, colors, labels, credits
     # ---------------------------------------------------------
@@ -510,47 +316,47 @@ with st.container():
     'This will be used as the clipping boundary. ' \
     'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.')
 
-    #data layer multiselect
-    with st.sidebar:
-        selected_options = st.session_state.get('selected_options', [])
+    # #data layer multiselect
+    # with st.sidebar:
+    #     selected_options = st.session_state.get('selected_options', [])
 
 
-    #text box for data layers
-    with st.sidebar:
-        st.markdown(
-            """
-            <div style='color: #808080; overflow: hidden;
-            white-space: normal;
-            word-wrap: break-word;
-            margin-bottom: 15px;'>
-                <u>Ownership</u> - Bureau of Land Management<br>
-                <u>Land cover</u> - National Land Cover Database<br>
-                <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
-                <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    # #text box for data layers
+    # with st.sidebar:
+    #     st.markdown(
+    #         """
+    #         <div style='color: #808080; overflow: hidden;
+    #         white-space: normal;
+    #         word-wrap: break-word;
+    #         margin-bottom: 15px;'>
+    #             <u>Ownership</u> - Bureau of Land Management<br>
+    #             <u>Land cover</u> - National Land Cover Database<br>
+    #             <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
+    #             <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
+    #         </div>
+    #         """,
+    #         unsafe_allow_html=True
+    #     )
 
-    #data format multiselect
-    options_filetype = '.tif', '.pdf'
-    with st.sidebar:
-        selected_filetype = st.session_state.get('selected_filetype', [])
+    # #data format multiselect
+    # options_filetype = '.tif', '.pdf'
+    # with st.sidebar:
+    #     selected_filetype = st.session_state.get('selected_filetype', [])
 
-    #data format text box
-    with st.sidebar:
-        st.markdown(
-            """
-            <div style='color: #808080;  overflow: hidden;
-            white-space: normal;
-            word-wrap: break-word;
-            margin-bottom: 15px;'>
-                PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
+    # #data format text box
+    # with st.sidebar:
+    #     st.markdown(
+    #         """
+    #         <div style='color: #808080;  overflow: hidden;
+    #         white-space: normal;
+    #         word-wrap: break-word;
+    #         margin-bottom: 15px;'>
+    #             PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
                 
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    #         </div>
+    #         """,
+    #         unsafe_allow_html=True
+    #     )
     # ---------------------------------------------------------
     #  Build map and drawing tools
     # ---------------------------------------------------------
