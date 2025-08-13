@@ -217,11 +217,11 @@ with st.container():
     # ---------------------------------------------------------
     #  App content
     # ---------------------------------------------------------
-
+    st.title('Bristol Bay Wildfire Management Data Tool')
     # Explanation text - visible on both mobile and desktop
     st.write(
-        'The goal of this tool is to make wildfire managment data layers more accessible and easier to use by clipping data to your area of interest and mapping the data.' \
-        'Begin by selecting the data layers and data format you are interested  (if on a phone, click the arrows in the upper left). ' \
+        'The goal of this tool is to make wildfire managment data layers more accessible and easier to use by cropping data to your area of interest and mapping the data. ' \
+        'Begin by selecting the data layers and data format you are interested (if on a phone, click the arrows in the upper left). ' \
         'Next, draw a boundary on the map by clicking on the rectangle tool in the upper left corner of the map. ' \
         'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.'
     )
