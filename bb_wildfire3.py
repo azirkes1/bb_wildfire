@@ -272,7 +272,7 @@ with st.container():
             key="data_layers_select" # Single key for unified multiselect
         )
         
-        with st.expander("Data Sources"):
+        with st.expander("About Data Sources"):
             st.markdown(
                 """
                 <div style='color: #808080; line-height: 1.5;'>
@@ -288,21 +288,18 @@ with st.container():
         selected_filetype = st.multiselect(
             "What format do you want the data in?",
             ['.tif', '.pdf'],
-            key="file_format_select" # Single key for unified multiselect
+            key="file_format_select" 
         )
-        
-        st.markdown(
-            """
-            <div style='color: #808080; overflow: hidden; white-space: normal; word-wrap: break-word; margin-bottom: 15px;'>
+        with st.expander("About Data Types"):
+            st.markdown(
+                """
+                <div style='color: #808080; overflow: hidden; white-space: normal; word-wrap: break-word; margin-bottom: 15px;'>
                 PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
             </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    # --- Sync the selected values for your application logic ---
-    # Since there's only one set of dropdowns, we directly use their values.
-    # Initialize session state if not already present
+                """,
+                unsafe_allow_html=True
+            )
+            
     if 'selected_options' not in st.session_state:
         st.session_state.selected_options = []
     if 'selected_filetype' not in st.session_state:
