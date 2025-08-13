@@ -1,0 +1,24 @@
+name: Scheduled Empty Commit
+
+on:
+  schedule:
+    - cron: '0 */10 * * *'  # Runs every 10 hours (UTC)
+  workflow_dispatch:         # Allows manual triggering
+
+jobs:
+  empty-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create empty commit
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git commit --allow-empty -m "Scheduled empty commit [skip ci]"
+          git pull --rebase
+          git push origin HEAD:${{ github.ref_name }}  # Corrected this line
