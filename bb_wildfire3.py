@@ -178,7 +178,7 @@ with st.container():
 # This CSS will hide/show elements based on screen width
     st.markdown("""
     <style>
-    /* Base Streamlit layout adjustments */
+    /* Base Streamlit layout adjustments: Remove unwanted padding/margins */
     .main > div:first-child,
     .main .block-container > div:first-child {
         margin-top: 0 !important;
@@ -214,64 +214,10 @@ with st.container():
         border: none !important;
     }
 
-    /* Style for the mobile dropdown container content */
-    .mobile-content {
-        background-color: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    /* --- Responsive Layout Rules --- */
-
-    /* Mobile-only content (visible on mobile, hidden on desktop) */
-    .mobile-layout-container {
-        display: block; /* Visible by default (will be overridden on desktop) */
-    }
-
-    /* Desktop-only content (hidden on mobile, visible on desktop) */
-    .desktop-layout-container {
-        display: none; /* Hidden by default (will be overridden on desktop) */
-    }
-
-    /* Media query for Mobile devices (max-width 768px) */
-    @media (max-width: 768px) {
-        .mobile-layout-container {
-            display: block !important; /* Ensure mobile content is shown */
-        }
-        .desktop-layout-container {
-            display: none !important; /* Ensure desktop content is hidden */
-        }
-        section[data-testid="stSidebar"] {
-            display: none !important; /* Hide sidebar on mobile */
-        }
-    }
-
-    /* Media query for Desktop devices (min-width 769px) */
+    /* Adjust sidebar width for desktop */
     @media (min-width: 769px) {
-        .mobile-layout-container {
-            display: none !important; /* Ensure mobile content is hidden */
-        }
-        /* CRITICAL: Aggressively hide Streamlit elements within the mobile container on desktop */
-        .mobile-layout-container div[data-testid="stMultiSelect"],
-        .mobile-layout-container .stMarkdown,
-        .mobile-layout-container .stMultiSelect { /* Target component classes directly if needed */
-            display: none !important;
-            visibility: hidden !important; /* Also hide visually */
-            height: 0 !important; /* Collapse vertical space */
-            min-height: 0 !important; /* Ensure min-height is also 0 */
-            padding: 0 !important; /* Remove padding */
-            margin: 0 !important; /* Remove margin */
-            line-height: 0 !important; /* Collapse text line height */
-        }
-
-        .desktop-layout-container {
-            display: block !important; /* Ensure desktop content is shown */
-        }
         section[data-testid="stSidebar"] {
-            display: block !important; /* Show sidebar on desktop */
-            width: 350px !important; /* Set sidebar width */
+            width: 350px !important; /* Set sidebar width for desktop */
             overflow: auto !important; /* Allow scrolling if content overflows */
             max-height: none !important;
         }
@@ -280,11 +226,23 @@ with st.container():
             overflow: auto !important;
         }
     }
+    /* On mobile, Streamlit handles hiding the sidebar by default and providing the hamburger menu.
+    No explicit CSS display:none is needed for the sidebar on mobile here, as Streamlit manages it.*/
+
+    /* Custom style for the mobile-like content which is now just informational, not interactive */
+    .mobile-content {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
     # --- App Content ---
 
+    # Explanation text - visible on both mobile and desktop
     st.write(
         'This tool allows a user to download relevant wildfire management data layers clipped to a region of interest. ' \
         'Simply select the data layers and data format you are interested in below. Next, draw a boundary on the map by clicking on the rectangle tool in the upper left corner of the map. ' \
@@ -292,64 +250,18 @@ with st.container():
         'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.'
     )
 
-    # Initialize variables for both mobile and desktop dropdowns to empty lists.
-    # This ensures they always exist, preventing NameErrors, even if a particular
-    # dropdown set isn't interacted with on the current rerun.
-    selected_options_mobile = []
-    selected_filetype_mobile = []
-    selected_options_desktop = []
-    selected_filetype_desktop = []
-
-    # --- Mobile Layout (always rendered in Python, visibility controlled by CSS) ---
-    with st.container(border=False):
-        st.markdown('<div class="mobile-layout-container">', unsafe_allow_html=True)
-        st.markdown('<div class="mobile-content">', unsafe_allow_html=True)
-
-        selected_options_mobile = st.multiselect(
-            "Which data layers would you like to download?",
-            list(recipe.keys()),
-            key="mobile_data_layers_select" # Unique key for mobile multiselect
-        )
-
-        st.markdown(
-            """
-            <div style='color: #808080; margin-bottom: 15px;'>
-                <u>Ownership</u> - Bureau of Land Management<br>
-                <u>Land cover</u> - National Land Cover Database<br>
-                <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
-                <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        selected_filetype_mobile = st.multiselect(
-            "What format do you want the data in?",
-            ['.tif', '.pdf'],
-            key="mobile_file_format_select" # Unique key for mobile multiselect
-        )
-
-        st.markdown(
-            """
-            <div style='color: #808080; margin-bottom: 15px;'>
-                PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        st.markdown('</div>', unsafe_allow_html=True) # Close mobile-content
-        st.markdown('</div>', unsafe_allow_html=True) # Close mobile-layout-container
-
-
-    # --- Desktop Layout (always rendered in Python, visibility controlled by CSS) ---
+    # --- Unified Dropdowns in Sidebar (Desktop and Mobile) ---
+    # All interactive selections are placed here.
+    # On desktop, this sidebar is always visible.
+    # On mobile, Streamlit hides this sidebar by default and provides a hamburger menu (☰)
+    # for the user to open it. This makes it "inherently safe for mobile."
     with st.sidebar:
-        st.markdown('<div class="desktop-layout-container">', unsafe_allow_html=True)
+        st.header("Data Selection Options") # Added a header for clarity
 
-        selected_options_desktop = st.multiselect(
+        selected_options = st.multiselect(
             "Which data layers would you like to download?",
             list(recipe.keys()),
-            key="desktop_data_layers_select" # Unique key for desktop multiselect
+            key="data_layers_select" # Single key for unified multiselect
         )
         
         st.markdown(
@@ -364,10 +276,10 @@ with st.container():
             unsafe_allow_html=True
         )
         
-        selected_filetype_desktop = st.multiselect(
+        selected_filetype = st.multiselect(
             "What format do you want the data in?",
             ['.tif', '.pdf'],
-            key="desktop_file_format_select" # Unique key for desktop multiselect
+            key="file_format_select" # Single key for unified multiselect
         )
         
         st.markdown(
@@ -378,39 +290,18 @@ with st.container():
             """,
             unsafe_allow_html=True
         )
-        st.markdown('</div>', unsafe_allow_html=True) # Close desktop-layout-container
-
 
     # --- Sync the selected values for your application logic ---
-    # Initialize common session state variables if they don't exist
+    # Since there's only one set of dropdowns, we directly use their values.
+    # Initialize session state if not already present
     if 'selected_options' not in st.session_state:
         st.session_state.selected_options = []
     if 'selected_filetype' not in st.session_state:
         st.session_state.selected_filetype = []
 
-    # Get current values from the *active* dropdowns (based on which one was last interacted with)
-    # Streamlit's session state handles the persistence of values for both sets of dropdowns.
-    # We need to determine which set is currently being used by the user.
-    # A robust way is to check the current screen width, or simply pick the non-empty one.
-    # Given that only one set should be visible, we can prioritize one over the other.
-
-    # Check if mobile dropdowns have a value. If so, they are likely the active ones.
-    if st.session_state.get("mobile_data_layers_select") and len(st.session_state.get("mobile_data_layers_select")) > 0:
-        st.session_state.selected_options = st.session_state.mobile_data_layers_select
-    elif st.session_state.get("desktop_data_layers_select"):
-        st.session_state.selected_options = st.session_state.desktop_data_layers_select
-    else:
-        st.session_state.selected_options = [] # Default if neither is selected
-
-    if st.session_state.get("mobile_file_format_select") and len(st.session_state.get("mobile_file_format_select")) > 0:
-        st.session_state.selected_filetype = st.session_state.mobile_file_format_select
-    elif st.session_state.get("desktop_file_format_select"):
-        st.session_state.selected_filetype = st.session_state.desktop_file_format_select
-    else:
-        st.session_state.selected_filetype = [] # Default if neither is selected
-
-    # Now, `st.session_state.selected_options` and `st.session_state.selected_filetype`
-    # will contain the selections from the currently visible/active set of dropdowns.
+    # Directly assign values from the unified dropdowns in the sidebar
+    st.session_state.selected_options = st.session_state.get("data_layers_select", [])
+    st.session_state.selected_filetype = st.session_state.get("file_format_select", [])
         # ---------------------------------------------------------
     #  Build map and drawing tools
     # ---------------------------------------------------------
