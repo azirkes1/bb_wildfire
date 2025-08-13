@@ -226,7 +226,7 @@ with st.container():
     """, unsafe_allow_html=True)
 
     st.title("Bristol Bay Wildfire Management Data Tool")
-    
+
     # Explanation text - visible on both mobile and desktop
     st.write(
         'The goal of this tool is to make wildfire managment data layers more accessible and easier to use by cropping data to your area of interest and mapping the data. ' \
@@ -250,16 +250,17 @@ with st.container():
         )
         
         st.markdown(
-            """
-            <div style='color: #808080; overflow: hidden; white-space: normal; word-wrap: break-word; margin-bottom: 15px;'>
-                <u>Ownership</u> - Bureau of Land Management<br>
-                <u>Land cover</u> - National Land Cover Database<br>
-                <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
-                <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        """
+        <div style='color: #808080; overflow: hidden; white-space: normal; word-wrap: break-word; margin-bottom: 15px;'>
+            <u>Data Sources:</u><br><br>
+            Ownership - <b>Bureau of Land Management</b><br>
+            Land cover - <b>National Land Cover Database</b><br>
+            Wildfire Jurisdiction - <b>Bureau of Land Management</b><br>
+            Flammability Hazard - <b>University of Alaska - Anchorage</b><br>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
         
         selected_filetype = st.multiselect(
             "What format do you want the data in?",
