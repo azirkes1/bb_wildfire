@@ -186,8 +186,7 @@ with st.container():
     /* Desktop / landscape */
     @media (min-width: 769px), (orientation: landscape) {
         .folium-map, iframe {
-            height: 75vh !important; /* slightly taller than before */
-        }
+            height: 60vh !important; 
     }
 
     /* Mobile portrait: fill almost full screen */
