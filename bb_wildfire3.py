@@ -499,45 +499,37 @@ with st.container():
         # ---------------------------------------------------------
         #  set up PDF helper functions 
         # ---------------------------------------------------------
-        
-        
-
+    
         def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
-            try:
-                st.write("🔥🔥🔥 THIS IS THE CORRECT DEBUG FUNCTION VERSION 🔥🔥🔥")
-                
-                # Case-insensitive search for the layer
-                matched_key = next(
-                    (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
-                    None
-                )
-                
-                if matched_key is None:
-                    return b""
-                
-                layer_recipe = recipe[matched_key]
-                description = layer_recipe.get("description", "No description available.")
-                credits = layer_recipe.get("credits", "No credits provided.")
-                classes = layer_recipe.get("labels", {})
-                symbology = layer_recipe.get("colors", {})
-
-                # Build the metadata text
-                metadata_lines = [
-                    f"Layer: {matched_key}",
-                    f"Description: {description}",
-                    f"Credits: {credits}",
-                    "Classes:",
-                    *[f"  - {k}: {v}" for k, v in classes.items()],
-                    "Symbology:",
-                    *[f"  - {k}: RGB{v}" for k, v in symbology.items()]
-                ]
-
-                text = "\n".join(metadata_lines)
-                return text.encode("utf-8")
-                
-            except Exception as e:
-                st.error(f"🚨 ERROR: {e}")
+         # Case-insensitive search for the layer
+            matched_key = next(
+                (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
+                None
+            )
+            
+            if matched_key is None:
                 return b""
+            
+            layer_recipe = recipe[matched_key]
+            description = layer_recipe.get("description", "No description available.")
+            credits = layer_recipe.get("credits", "No credits provided.")
+            classes = layer_recipe.get("labels", {})
+            symbology = layer_recipe.get("colors", {})
+
+            # Build the metadata text
+            metadata_lines = [
+                f"Layer: {matched_key}",
+                f"Description: {description}",
+                f"Credits: {credits}",
+                "Classes:",
+                *[f"  - {k}: {v}" for k, v in classes.items()],
+                "Symbology:",
+                *[f"  - {k}: RGB{v}" for k, v in symbology.items()]
+            ]
+
+            text = "\n".join(metadata_lines)
+            return text.encode("utf-8")
+        
         #function to calculate bounding box from coordinates
         def _min_max_coords(coords): 
                     xs, ys = zip(*coords)
@@ -855,9 +847,7 @@ with st.container():
                     if name.endswith(".tif") or name.endswith(".tiff"):
                         return zf.read(name)
                 raise ValueError("No .tif file found in the ZIP archive.")
-            
-       
-
+        
         # ---------------------------------------------------------
         #  back to main img function - extracting TIF data
         # ---------------------------------------------------------
@@ -865,17 +855,12 @@ with st.container():
         #extract just the selected layer's recipe
         layer_recipe = recipe[layer_name] 
 
-        st.write("🚨 ABOUT TO CALL generate_text_metadata_file")  # Add this line
-        st.write(f"🚨 layer_name = {layer_name}")  # Add this line
-        st.write(f"🚨 recipe keys = {list(recipe.keys())}")  # Add this line
-
         #create metadata text file 
         txt_bytes = generate_text_metadata_file(recipe, layer_name) 
 
-        st.write("🚨 FUNCTION COMPLETED")  # Add this line
-
         #get image to google earth engine and cast to int
         img_ee = layer_recipe["ee_image"].clip(roi).unmask(0).toInt()
+
         #generate download URL with nearest resampling
         tiff_url = img_ee.getDownloadURL({
             'scale': 30,
