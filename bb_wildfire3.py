@@ -185,7 +185,7 @@ with st.container():
         </script>
         """
 
-        # Updated CSS with mobile detection
+    # Updated CSS with mobile detection
     st.markdown(mobile_detection, unsafe_allow_html=True)
 
     st.markdown("""
@@ -229,9 +229,9 @@ with st.container():
 
     # Mobile version of your sidebar content
     selected_options_mobile = st.multiselect(
-        "Which data layers would you like to download? (Mobile)",
+        "Which data layers would you like to download?",
         list(recipe.keys()),
-        key="mobile_multiselect_1"
+        key="mobile_data_layers"
     )
 
     st.markdown(
@@ -247,9 +247,9 @@ with st.container():
     )
 
     selected_filetype_mobile = st.multiselect(
-        "What format do you want the data in? (Mobile)",
+        "What format do you want the data in?",
         ['.tif', '.pdf'],
-        key="mobile_multiselect_2"
+        key="mobile_file_format"
     )
 
     st.markdown(
@@ -269,11 +269,49 @@ with st.container():
         st.markdown('<div class="desktop-only">', unsafe_allow_html=True)
         selected_options = st.multiselect(
             "Which data layers would you like to download?",
-            list(recipe.keys())
+            list(recipe.keys()),
+            key="desktop_data_layers"
         )
         
-        # ... your existing sidebar content ...
+        st.markdown(
+            """
+            <div style='color: #808080; overflow: hidden;
+            white-space: normal;
+            word-wrap: break-word;
+            margin-bottom: 15px;'>
+                <u>Ownership</u> - Bureau of Land Management<br>
+                <u>Land cover</u> - National Land Cover Database<br>
+                <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
+                <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        selected_filetype = st.multiselect(
+            "What format do you want the data in?",
+            ['.tif', '.pdf'],
+            key="desktop_file_format"
+        )
+        
+        st.markdown(
+            """
+            <div style='color: #808080;  overflow: hidden;
+            white-space: normal;
+            word-wrap: break-word;
+            margin-bottom: 15px;'>
+                PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
+                
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         st.markdown('</div>', unsafe_allow_html=True)
+
+    # Sync the values between mobile and desktop
+    # Use whichever one has values
+    final_selected_options = selected_options_mobile if selected_options_mobile else selected_options
+    final_selected_filetype = selected_filetype_mobile if selected_filetype_mobile else selected_filetype
     # ---------------------------------------------------------
     #  define metadata - title, ee_image, colors, labels, credits
     # ---------------------------------------------------------
