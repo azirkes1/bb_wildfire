@@ -171,52 +171,138 @@ with st.container():
                     "Alaska Natural Resource Management. Accessed April 01, 2025. "
                     "https://alaskanrm.com/wildfire-exposure/."
         }}
-    mobile_detection = """
-        <script>
-        function isMobile() {
-            return window.innerWidth <= 768;
-        }
+    # Alternative approach: Create mobile-specific content
 
-        function updateLayout() {
-            // Remove existing classes
-            document.body.classList.remove('mobile-device', 'desktop-device');
+# Add this JavaScript to detect mobile and only show mobile content when needed
+    mobile_detection = """
+    <style>
+    /* Remove the white bar completely */
+    .main > div:first-child,
+    .main .block-container > div:first-child {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* Force remove any top spacing */
+    div[data-testid="block-container"] {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* Remove the 20px height div you added */
+    div[style*="height:20px"] {
+        display: none !important;
+    }
+
+    /* Hide mobile content on desktop by default */
+    .mobile-only {
+        display: none !important;
+    }
+
+    /* Show mobile content only on mobile */
+    @media (max-width: 768px) {
+        .mobile-only {
+            display: block !important;
+        }
+        
+        /* Hide sidebar on mobile */
+        section[data-testid="stSidebar"] {
+            display: none !important;
+        }
+    }
+
+    /* Desktop styles - ensure sidebar is visible */
+    @media (min-width: 769px) {
+        .mobile-only {
+            display: none !important;
+        }
+        
+        section[data-testid="stSidebar"] {
+            display: block !important;
+            width: 350px !important;
+        }
+    }
+
+    /* Style mobile content */
+    .mobile-content {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    /* Your existing styles... */
+    .element-container:has(.folium-map),
+    iframe {
+        margin-bottom: 0px !important;
+    }
+
+    .folium-map {
+        height: 500px !important;
+        overflow: hidden !important;
+    }
+
+    footer, header, .stDeployButton {
+        display: none !important;
+    }
+
+    iframe {
+        height: 500px !important;
+        display: block;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        border: none !important;
+    }
+
+    .element-container:has(.folium-map),
+    .block-container,
+    .main {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+    </style>
+
+    <script>
+    function updateMobileLayout() {
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+            // Show mobile content
+            const mobileElements = document.querySelectorAll('.mobile-only');
+            mobileElements.forEach(el => {
+                el.style.display = 'block';
+            });
             
-            if (isMobile()) {
-                document.body.classList.add('mobile-device');
-                // Hide sidebar on mobile
-                const sidebar = document.querySelector('section[data-testid="stSidebar"]');
-                if (sidebar) sidebar.style.display = 'none';
-                
-                // Show mobile content
-                const mobileElements = document.querySelectorAll('.mobile-only');
-                mobileElements.forEach(el => el.style.display = 'block');
-                
-                // Hide desktop content
-                const desktopElements = document.querySelectorAll('.desktop-only');
-                desktopElements.forEach(el => el.style.display = 'none');
-            } else {
-                document.body.classList.add('desktop-device');
-                // Show sidebar on desktop
-                const sidebar = document.querySelector('section[data-testid="stSidebar"]');
-                if (sidebar) sidebar.style.display = 'block';
-                
-                // Hide mobile content
-                const mobileElements = document.querySelectorAll('.mobile-only');
-                mobileElements.forEach(el => el.style.display = 'none');
-                
-                // Show desktop content
-                const desktopElements = document.querySelectorAll('.desktop-only');
-                desktopElements.forEach(el => el.style.display = 'block');
+            // Hide sidebar
+            const sidebar = document.querySelector('section[data-testid="stSidebar"]');
+            if (sidebar) {
+                sidebar.style.display = 'none';
+            }
+        } else {
+            // Hide mobile content on desktop
+            const mobileElements = document.querySelectorAll('.mobile-only');
+            mobileElements.forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Show sidebar
+            const sidebar = document.querySelector('section[data-testid="stSidebar"]');
+            if (sidebar) {
+                sidebar.style.display = 'block';
             }
         }
+    }
 
-        // Run on load and resize
-        window.addEventListener('load', updateLayout);
-        window.addEventListener('resize', updateLayout);
-        // Run immediately
-        updateLayout();
-        </script>
-        """
+    // Run on load and resize
+    window.addEventListener('load', function() {
+        setTimeout(updateMobileLayout, 100);
+    });
+    window.addEventListener('resize', updateMobileLayout);
+    // Run immediately
+    setTimeout(updateMobileLayout, 100);
+    </script>
+    """
 
     # Updated CSS with mobile detection
     st.markdown(mobile_detection, unsafe_allow_html=True)
@@ -348,9 +434,48 @@ with st.container():
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    
+    # Regular sidebar (hidden on mobile)
+    with st.sidebar:
+        selected_options = st.multiselect(
+            "Which data layers would you like to download?",
+            list(recipe.keys()),
+            key="desktop_data_layers"
+        )
         
-       
+        st.markdown(
+            """
+            <div style='color: #808080; overflow: hidden;
+            white-space: normal;
+            word-wrap: break-word;
+            margin-bottom: 15px;'>
+                <u>Ownership</u> - Bureau of Land Management<br>
+                <u>Land cover</u> - National Land Cover Database<br>
+                <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
+                <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        selected_filetype = st.multiselect(
+            "What format do you want the data in?",
+            ['.tif', '.pdf'],
+            key="desktop_file_format"
+        )
+        
+        st.markdown(
+            """
+            <div style='color: #808080;  overflow: hidden;
+            white-space: normal;
+            word-wrap: break-word;
+            margin-bottom: 15px;'>
+                PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
+                
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # Sync the values between mobile and desktop
     # Combine values from both versions to handle the mobile error
     if 'mobile_data_layers' in st.session_state and st.session_state.mobile_data_layers:
