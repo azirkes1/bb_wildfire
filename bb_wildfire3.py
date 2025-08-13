@@ -440,6 +440,7 @@ with st.container():
     </script>
     """
     m.get_root().html.add_child(folium.Element(refit_js))
+    st_folium(m, use_container_width=True)
     #add layer toggle control
     folium.LayerControl(collapsed=False).add_to(m)
     
