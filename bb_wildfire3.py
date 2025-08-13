@@ -173,6 +173,9 @@ with st.container():
         }}
     # Alternative approach: Create mobile-specific content
 
+
+# --- Custom CSS for Responsive Layout ---
+# This CSS will hide/show elements based on screen width
     st.markdown("""
     <style>
     /* Remove the default top spacing from Streamlit's main content area */
@@ -212,17 +215,12 @@ with st.container():
         border: none !important;
     }
 
-    /* Mobile-only content: hidden by default on desktop */
-    .mobile-only {
-        display: none !important;
+    /* Mobile-only content container: hidden by default on desktop */
+    .mobile-only-container {
+        display: none; /* Hidden by default */
     }
 
-    /* Desktop-only content: hidden by default on mobile */
-    .desktop-only {
-        display: block !important; /* Visible by default on desktop */
-    }
-
-    /* Style for the mobile dropdown container */
+    /* Style for the mobile dropdown container content */
     .mobile-content {
         background-color: #f8f9fa;
         border: 1px solid #e9ecef;
@@ -233,11 +231,8 @@ with st.container():
 
     /* Media query for Mobile devices (max-width 768px) */
     @media (max-width: 768px) {
-        .mobile-only {
+        .mobile-only-container {
             display: block !important; /* Show mobile content */
-        }
-        .desktop-only {
-            display: none !important; /* Hide desktop content */
         }
         section[data-testid="stSidebar"] {
             display: none !important; /* Hide sidebar on mobile */
@@ -246,12 +241,15 @@ with st.container():
 
     /* Media query for Desktop devices (min-width 769px) */
     @media (min-width: 769px) {
-        .mobile-only {
+        .mobile-only-container {
             display: none !important; /* Hide mobile content */
         }
-        .desktop-only {
-            display: block !important; /* Show desktop content */
+        /* Explicitly hide the Streamlit multiselect and markdown elements within the mobile container on desktop */
+        .mobile-only-container div[data-testid="stMultiSelect"],
+        .mobile-only-container .stMarkdown {
+            display: none !important;
         }
+
         section[data-testid="stSidebar"] {
             display: block !important; /* Show sidebar on desktop */
             width: 350px !important; /* Set sidebar width */
@@ -276,54 +274,53 @@ with st.container():
         'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.'
     )
 
-    # --- Mobile-only Dropdowns (visible above map on mobile, hidden on desktop) ---
-    st.markdown('<div class="mobile-only">', unsafe_allow_html=True)
-    st.markdown('<div class="mobile-content">', unsafe_allow_html=True)
+    # --- Mobile-only Dropdowns Container (visible above map on mobile, hidden on desktop) ---
+    # Use st.container() to give a clear parent for CSS targeting
+    with st.container(border=False):
+        # Apply the mobile-only-container class for CSS control
+        st.markdown('<div class="mobile-only-container">', unsafe_allow_html=True)
+        st.markdown('<div class="mobile-content">', unsafe_allow_html=True)
 
-    selected_options_mobile = st.multiselect(
-        "Which data layers would you like to download?",
-        list(recipe.keys()),
-        key="mobile_data_layers_select" # Unique key for mobile multiselect
-    )
+        selected_options_mobile = st.multiselect(
+            "Which data layers would you like to download?",
+            list(recipe.keys()),
+            key="mobile_data_layers_select" # Unique key for mobile multiselect
+        )
 
-    st.markdown(
-        """
-        <div style='color: #808080; margin-bottom: 15px;'>
-            <u>Ownership</u> - Bureau of Land Management<br>
-            <u>Land cover</u> - National Land Cover Database<br>
-            <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
-            <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        st.markdown(
+            """
+            <div style='color: #808080; margin-bottom: 15px;'>
+                <u>Ownership</u> - Bureau of Land Management<br>
+                <u>Land cover</u> - National Land Cover Database<br>
+                <u>Wildfire Jurisdiction</u> - Bureau of Land Management<br>
+                <u>Flammability Hazard</u> - University of Alaska - Anchorage<br>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    selected_filetype_mobile = st.multiselect(
-        "What format do you want the data in?",
-        ['.tif', '.pdf'],
-        key="mobile_file_format_select" # Unique key for mobile multiselect
-    )
+        selected_filetype_mobile = st.multiselect(
+            "What format do you want the data in?",
+            ['.tif', '.pdf'],
+            key="mobile_file_format_select" # Unique key for mobile multiselect
+        )
 
-    st.markdown(
-        """
-        <div style='color: #808080; margin-bottom: 15px;'>
-            PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        st.markdown(
+            """
+            <div style='color: #808080; margin-bottom: 15px;'>
+                PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    st.markdown('</div>', unsafe_allow_html=True) # Close mobile-content
-    st.markdown('</div>', unsafe_allow_html=True) # Close mobile-only
+        st.markdown('</div>', unsafe_allow_html=True) # Close mobile-content
+        st.markdown('</div>', unsafe_allow_html=True) # Close mobile-only-container
 
-    # --- Desktop-only Dropdowns (visible in sidebar on desktop, hidden on mobile) ---
-    # The 'desktop-only' class is implied by being outside the 'mobile-only' div
-    # and within the st.sidebar context for desktop, controlled by media queries.
+
+    # --- Desktop-only Dropdowns (within sidebar) ---
     with st.sidebar:
-        # Adding a div to explicitly wrap desktop sidebar content if needed for future styling,
-        # though the st.sidebar context handles most of it.
-        st.markdown('<div class="desktop-only">', unsafe_allow_html=True)
-
+        # No extra 'desktop-only' div needed here, as the sidebar itself is controlled by CSS
         selected_options_desktop = st.multiselect(
             "Which data layers would you like to download?",
             list(recipe.keys()),
@@ -356,30 +353,37 @@ with st.container():
             """,
             unsafe_allow_html=True
         )
-        st.markdown('</div>', unsafe_allow_html=True) # Close desktop-only
 
     # --- Sync the selected values for your application logic ---
-    # This ensures that 'st.session_state.selected_options' and 'st.session_state.selected_filetype'
-    # always reflect the values from whichever set of dropdowns is currently active.
-
     # Initialize session state if not already present
     if 'selected_options' not in st.session_state:
         st.session_state.selected_options = []
     if 'selected_filetype' not in st.session_state:
         st.session_state.selected_filetype = []
 
+    # Ensure selected_options_mobile and selected_options_desktop are always defined as lists
+    # Get current values, or default to empty list if key not yet in session_state
+    selected_options_mobile_val = st.session_state.get("mobile_data_layers_select", [])
+    selected_filetype_mobile_val = st.session_state.get("mobile_file_format_select", [])
+
+    selected_options_desktop_val = st.session_state.get("desktop_data_layers_select", [])
+    selected_filetype_desktop_val = st.session_state.get("desktop_file_format_select", [])
+
     # Update session state based on which set of dropdowns has a value
     # Prioritize mobile if it has a selection, otherwise use desktop's.
-    # This ensures the final_selected_options always holds the active selection.
-    if selected_options_mobile:
-        st.session_state.selected_options = selected_options_mobile
-    elif selected_options_desktop:
-        st.session_state.selected_options = selected_options_desktop
+    if selected_options_mobile_val:
+        st.session_state.selected_options = selected_options_mobile_val
+    elif selected_options_desktop_val:
+        st.session_state.selected_options = selected_options_desktop_val
+    else:
+        st.session_state.selected_options = [] # Ensure it's always set
 
-    if selected_filetype_mobile:
-        st.session_state.selected_filetype = selected_filetype_mobile
-    elif selected_filetype_desktop:
-        st.session_state.selected_filetype = selected_filetype_desktop
+    if selected_filetype_mobile_val:
+        st.session_state.selected_filetype = selected_filetype_mobile_val
+    elif selected_filetype_desktop_val:
+        st.session_state.selected_filetype = selected_filetype_desktop_val
+    else:
+        st.session_state.selected_filetype = [] # Ensure it's always set
 
     # ---------------------------------------------------------
     #  Build map and drawing tools
