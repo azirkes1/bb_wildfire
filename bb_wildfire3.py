@@ -152,7 +152,7 @@ with st.container():
             "Bureau of Land Management, Alaska Fire Service."
             "Alaska Wildland Fire Jurisdictions (AKWFJ). "
             "Last modified March 3, 2023. ArcGIS Online. "
-            "https://www.arcgis.com/home/item.html?\n"
+            "https://www.arcgis.com/home/item.html?"
             "id=1091963729c54d3386b5e60995da6fff." 
         },
         "Flammability Hazard": {
