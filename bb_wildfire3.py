@@ -190,8 +190,9 @@ with st.container():
         margin-top: 0 !important;
     }
 
-    /* Hide Streamlit's default footer, header, and deploy button */
-    footer, header, .stDeployButton {
+    /* Hide Streamlit's default footer and deploy button */
+    /* IMPORTANT: Removed 'header' from this list to ensure the main Streamlit header (containing the hamburger menu) is visible */
+    footer, .stDeployButton {
         display: none !important;
     }
 
@@ -237,18 +238,21 @@ with st.container():
         padding: 15px;
         margin-bottom: 20px;
     }
-                
+
+    /* Style for the hamburger menu icon to make it more visible */
+    /* Target the button that toggles the sidebar and its SVG icon */
     [data-testid="stSidebarToggle"] svg {
-    fill: #000000 !important; /* Make the icon black for strong contrast */
-    background-color: #f0f2f6; /* Light gray background behind the icon */
-    border-radius: 5px; /* Slightly rounded corners for the background */
-    padding: 3px; /* Add some padding around the icon */
+        fill: #000000 !important; /* Make the icon black for strong contrast */
+        background-color: #f0f2f6; /* Light gray background behind the icon */
+        border-radius: 5px; /* Slightly rounded corners for the background */
+        padding: 3px; /* Add some padding around the icon */
     }
 
     /* Also target the parent button itself for background on hover/active if needed */
     [data-testid="stSidebarToggle"] {
         background-color: transparent !important; /* Ensure button background doesn't interfere */
     }
+
     </style>
     """, unsafe_allow_html=True)
 
@@ -305,7 +309,7 @@ with st.container():
 
     # --- Sync the selected values for your application logic ---
     # Since there's only one set of dropdowns, we directly use their values.
-    ## Initialize session state if not already present
+    # Initialize session state if not already present
     if 'selected_options' not in st.session_state:
         st.session_state.selected_options = []
     if 'selected_filetype' not in st.session_state:
