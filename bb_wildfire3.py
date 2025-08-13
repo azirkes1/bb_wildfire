@@ -249,7 +249,7 @@ with st.container():
             key="data_layers_select" # Single key for unified multiselect
         )
         
-        with st.expander("Click here for data sources"):
+        with st.expander("Data Sources"):
             st.markdown(
                 """
                 <div style='color: #808080; line-height: 1.5;'>
@@ -257,8 +257,6 @@ with st.container():
                     <b>Land Cover</b> – National Land Cover Database<br>
                     <b>Wildfire Jurisdiction</b> – Bureau of Land Management<br>
                     <b>Flammability Hazard</b> – University of Alaska – Anchorage<br>
-                    <b>BBNC Boundary</b> – Google Earth Engine Asset: projects/ee-azirkes1/assets/AK_proj/bbnc_boundary<br>
-                    <b>Place Names</b> – ArcGIS FeatureServer: PlaceNamesBBNC
                 </div>
                 """,
                 unsafe_allow_html=True
