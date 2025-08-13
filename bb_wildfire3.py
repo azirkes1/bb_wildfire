@@ -252,7 +252,7 @@ with st.container():
         st.markdown(
         """
         <div style='color: #808080; overflow: hidden; white-space: normal; word-wrap: break-word; margin-bottom: 15px;'>
-            <u>Data Sources:</u><br><br>
+            <u>Data Sources:</u>
             <b>Ownership</b> - Bureau of Land Management<br>
             <b>Land cover</b> - National Land Cover Database<br>
             <b>Wildfire Jurisdiction</b> - Bureau of Land Management<br>
