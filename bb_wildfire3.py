@@ -263,9 +263,13 @@ with st.container():
     # On mobile, Streamlit hides this sidebar by default and provides a hamburger menu (☰)
     # for the user to open it. This makes it "inherently safe for mobile."
     with st.sidebar:
-        # Question + dropdown (no extra gap between)
+       # First question + dropdown
+        st.sidebar.markdown(
+            "<div style='font-size:18px; font-weight:bold;'>Which data layers would you like to download?</div>",
+            unsafe_allow_html=True
+        )
         selected_options = st.sidebar.multiselect(
-            "### Which data layers would you like to download?",
+            "",  # label left empty so only the styled text shows above
             list(recipe.keys()),
             key="data_layers_select"
         )
@@ -287,8 +291,12 @@ with st.container():
         st.sidebar.markdown("<br><br>", unsafe_allow_html=True)
 
         # Second question + dropdown
+        st.sidebar.markdown(
+            "<div style='font-size:18px; font-weight:bold;'>What format do you want the data in?</div>",
+            unsafe_allow_html=True
+        )
         selected_filetype = st.sidebar.multiselect(
-            "### What format do you want the data in?",
+            "",
             ['.tif', '.pdf'],
             key="file_format_select"
         )
@@ -305,7 +313,7 @@ with st.container():
                 """,
                 unsafe_allow_html=True
             )
-
+            
     if 'selected_options' not in st.session_state:
         st.session_state.selected_options = []
     if 'selected_filetype' not in st.session_state:
