@@ -124,24 +124,23 @@ with st.container():
                 "Title": "Wildfire Jurisdiction",
                 "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/jurisdic_rep6').select('b1'),
                 "colors": {
-                    1: (8, 29, 88), #Deep Navy
-                    2: (165, 42, 42), #Dark Red
-                    3: (255, 140, 0), #Dark Orange
-                    4: (255, 215, 0), #Gold
-                    5: (34, 139, 34), #Forest Green
-                    6: (0, 191, 255), #Deep Sky Blue
-                    7: (138, 43, 226), #Blue Violet
-                    8: (255, 20, 147), #Deep Pink
-                    9: (210, 180, 140), #Tan
-                    10: (47, 79, 79), #Dark Slate Gray
-                    11: (220, 20, 60), #Crimson
-                    12: (255, 165, 0), #Orange
-                    13: (75, 0, 130), #Indigo
-                    14: (128, 128, 0), #Olive
-                    15: (0, 100, 0), #Dark Green
-                    16: (25, 25, 112), #Midnight Blue
-                },
-
+                    1: (0, 0, 0), #Black
+                    2: (34, 32, 52), #Dark Purple
+                    3: (69, 40, 60), #Dark Red
+                    4: (102, 57, 49), #Brown
+                    5: (143, 86, 59), #Dark Orange
+                    6: (223, 113, 38), #Orange
+                    7: (217, 160, 102), #Light Orange
+                    8: (238, 195, 154), #Beige
+                    9: (251, 242, 54), #Yellow
+                    10: (153, 229, 80), #Light Green
+                    11: (106, 190, 48), #Green
+                    12: (55, 148, 110), #Dark Green
+                    13: (75, 105, 47), #Forest Green
+                    14: (82, 75, 36), #Olive
+                    15: (50, 60, 57), #Dark Gray
+                    16: (63, 63, 116), #Blue
+                 },
                 "labels": {
                     1: 'USFWS', 
                     2: 'BLM', 
