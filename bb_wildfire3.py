@@ -124,22 +124,22 @@ with st.container():
                 "Title": "Wildfire Jurisdiction",
                 "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/jurisdic_rep6').select('b1'),
                 "colors": {
-                    1: (0, 0, 0),        # Black
-                    2: (230, 159, 0),    # Orange
-                    3: (86, 180, 233),   # Sky Blue
-                    4: (0, 158, 115),    # Bluish Green
-                    5: (240, 228, 66),   # Yellow
-                    6: (0, 114, 178),    # Blue
-                    7: (213, 94, 0),     # Vermillion
-                    8: (204, 121, 167),  # Reddish Purple
-                    9: (128, 128, 128),  # Gray
-                    10: (166, 86, 40),   # Brown
-                    11: (152, 78, 163),  # Purple
-                    12: (77, 175, 74),   # Green
-                    13: (255, 127, 0),   # Bright Orange
-                    14: (55, 126, 184),  # Strong Blue
-                    15: (228, 26, 28),   # Red
-                    16: (247, 129, 191), # Pink
+                    1: (0, 0, 0),       
+                    2: (230, 159, 0),    
+                    3: (86, 180, 233),   
+                    4: (0, 158, 115),    
+                    5: (240, 228, 66),   
+                    6: (0, 114, 178),    
+                    7: (213, 94, 0),     
+                    8: (204, 121, 167),  
+                    9: (128, 128, 128),  
+                    10: (166, 86, 40),   
+                    11: (152, 78, 163),  
+                    12: (77, 175, 74),   
+                    13: (255, 127, 0),   
+                    14: (55, 126, 184),  
+                    15: (228, 26, 28),   
+                    16: (247, 129, 191), 
                 },
                 "labels": {
                     1: 'USFWS', 
@@ -198,6 +198,7 @@ with st.container():
     # ---------------------------------------------------------
     #  CSS for Layout
     # ---------------------------------------------------------
+
     st.markdown("""
     <style>
     .folium-map, iframe {
@@ -249,7 +250,7 @@ with st.container():
 
     st.title("Bristol Bay Wildfire Management Data Tool")
 
-    # Explanation text - visible on both mobile and desktop
+    #explanation text 
     st.write(
         'The goal of this tool is to make wildfire managment data layers more accessible and easier to use. The output is your selected data layer cropped to your region of interest. ' \
         'Begin by selecting the data layers and data format you are interested in (if on a phone, click the arrows in the upper left). ' \
@@ -257,19 +258,14 @@ with st.container():
         'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.'
     )
 
-    # --- Unified Dropdowns in Sidebar (Desktop and Mobile) ---
-    # All interactive selections are placed here.
-    # On desktop, this sidebar is always visible.
-    # On mobile, Streamlit hides this sidebar by default and provides a hamburger menu (☰)
-    # for the user to open it. This makes it "inherently safe for mobile."
     with st.sidebar:
-       # First question + dropdown
+       #first question + dropdown
         st.sidebar.markdown(
             "<div style='font-size:18px; font-weight:bold;'>Which data layers would you like to download?</div>",
             unsafe_allow_html=True
         )
         selected_options = st.sidebar.multiselect(
-            "",  # label left empty so only the styled text shows above
+            "", 
             list(recipe.keys()),
             key="data_layers_select"
         )
@@ -287,10 +283,10 @@ with st.container():
                 unsafe_allow_html=True
             )
 
-        # Add two blank lines between dropdown and next question
+        #add two blank lines between dropdown and next question
         st.sidebar.markdown("<br><br>", unsafe_allow_html=True)
 
-        # Second question + dropdown
+        #second question + dropdown
         st.sidebar.markdown(
             "<div style='font-size:18px; font-weight:bold;'>What format do you want the data in?</div>",
             unsafe_allow_html=True
@@ -313,13 +309,13 @@ with st.container():
                 """,
                 unsafe_allow_html=True
             )
-            
+
     if 'selected_options' not in st.session_state:
         st.session_state.selected_options = []
     if 'selected_filetype' not in st.session_state:
         st.session_state.selected_filetype = []
 
-    # Directly assign values from the unified dropdowns in the sidebar
+    #directly assign values from the dropdowns in the sidebar
     st.session_state.selected_options = st.session_state.get("data_layers_select", [])
     st.session_state.selected_filetype = st.session_state.get("file_format_select", [])
 
@@ -498,7 +494,6 @@ with st.container():
         returned_objects=["all_drawings"]
     )
 
-
     # ---------------------------------------------------------
     #  main function, returns pdf, tif, metadata
     # ---------------------------------------------------------
@@ -511,8 +506,6 @@ with st.container():
         # ---------------------------------------------------------
     
         def generate_text_metadata_file(recipe: dict, layer_name: str) -> bytes:
-         # Case-insensitive search for the layer
-            # Case-insensitive search for the layer
             matched_key = next(
                 (k for k in recipe if k.strip().lower() == layer_name.strip().lower()),
                 None
@@ -527,7 +520,7 @@ with st.container():
             classes = layer_recipe.get("labels", {})
             symbology = layer_recipe.get("colors", {})
 
-            # Build the metadata text with lines around the title
+            #build the metadata text with lines around the title
             metadata_lines = [
                 "=" * 20,
                 f"Layer: {matched_key}",
@@ -612,7 +605,7 @@ with st.container():
                 # add patches to list 
                 patches.append(patch)
 
-            # create a blank figure and adds legend and patches
+            #create a blank figure and adds legend and patches
             fig = plt.figure()
             legend = fig.legend(
                 handles=patches,
@@ -624,12 +617,12 @@ with st.container():
                 handletextpad=0.6
             )
 
-            # adds legend to canvas
+            #adds legend to canvas
             canvas = FigureCanvas(fig)
             fig.set_size_inches(6, len(patches) * 0.4 + 0.4)
             canvas.draw()
 
-            # crop legend to content 
+            #crop legend to content 
             bbox = legend.get_window_extent()
             bbox = bbox.expanded(1.05, 1.05)
             image = np.frombuffer(canvas.buffer_rgba(), dtype='uint8').reshape(canvas.get_width_height()[::-1] + (4,))
@@ -646,11 +639,9 @@ with st.container():
             map_width_m = abs(xmax - xmin)
             scalebar_length = map_width_m / 3  
 
-            # Manual approach: calculate appropriate length in meters that represents nice mile values
-            # Convert map width from meters to miles
             map_width_miles = map_width_m * 0.000621371
             
-            # Choose a nice round number of miles for the scalebar (1, 2, 5, 10, etc.)
+            #choose a nice round number of miles for the scalebar (1, 2, 5, 10, etc.)
             if map_width_miles < 1:
                 target_miles = 0.5
             elif map_width_miles < 3:
@@ -662,7 +653,7 @@ with st.container():
             else:
                 target_miles = 10
             
-            # Convert target miles back to meters
+            #convert target miles back to meters
             target_length_m = target_miles * 1609.34
             
             scalebar = ScaleBar(
@@ -1147,13 +1138,12 @@ with st.container():
 
         polygon = ee.Geometry.Polygon(geometry["coordinates"])
 
-        # Check if within BBNC
+        #check if within BBNC
         bbnc_geom = bbnc.geometry()
         if not bbnc_geom.contains(polygon).getInfo():
             st.error("Your drawing is outside the BBNC boundary. Please draw within the designated area.")
             st.stop()
 
-        # --- ZIP + download logic ---
         zip_buffer = io.BytesIO()
         all_metadata = []
 
@@ -1184,7 +1174,7 @@ with st.container():
             mime="application/zip"
         )
     else:
-        # Handle specific errors here for clarity
+        #error handling
         if not selected_filetype or all(ft.strip() == "" for ft in selected_filetype):
             st.error("Please select a file format.")
         if not selected_options or all(opt.strip() == "" for opt in selected_options):
