@@ -161,7 +161,7 @@ with st.container():
                     16: 'City/AK DNR'
                 },
 
-                "credits": "DATA SOURCE: U.S. Department of the Interior, "
+                "credits": "data source: U.S. Department of the Interior, "
                 "Bureau of Land Management, Alaska Fire Service. "
                 "Alaska Wildland Fire Jurisdictions (AKWFJ). "
                 "Last modified March 3, 2023. ArcGIS Online. "
