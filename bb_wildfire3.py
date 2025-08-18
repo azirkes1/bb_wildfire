@@ -309,8 +309,8 @@ with st.container():
                 """,
                 unsafe_allow_html=True
             )
-        st.write("Need help using this tool? Here's a how to video:")
-        st.video("https://www.youtube.com/watch?v=iNuvv0aS0iE")
+        st.write("Need help using this tool?")
+        st.markdown("[Click here to watch a tutorial video](https://www.youtube.com/watch?v=iNuvv0aS0iE)")
 
     if 'selected_options' not in st.session_state:
         st.session_state.selected_options = []
