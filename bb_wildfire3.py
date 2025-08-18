@@ -125,21 +125,21 @@ with st.container():
                 "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/jurisdic_rep6').select('b1'),
                 "colors": {
                     1: (8, 29, 88), #Deep Navy
-                    2: (8, 64, 129), #Dark Blue  
-                    3: (5, 112, 176), #Medium Blue
-                    4: (54, 144, 192), #Light Blue
-                    5: (102, 189, 223), #Sky Blue
-                    6: (166, 217, 235), #Pale Blue
-                    7: (217, 239, 255), #Very Light Blue
-                    8: (255, 255, 191), #Light Yellow
-                    9: (254, 224, 139), #Yellow
-                    10: (253, 174, 97), #Light Orange
-                    11: (244, 109, 67), #Orange
-                    12: (215, 48, 39), #Red-Orange
-                    13: (165, 42, 42), #Dark Red
-                    14: (120, 30, 30), #Darker Red
-                    15: (80, 20, 20), #Very Dark Red
-                    16: (40, 10, 10), #Deepest Red
+                    2: (165, 42, 42), #Dark Red
+                    3: (255, 140, 0), #Dark Orange
+                    4: (255, 215, 0), #Gold
+                    5: (34, 139, 34), #Forest Green
+                    6: (0, 191, 255), #Deep Sky Blue
+                    7: (138, 43, 226), #Blue Violet
+                    8: (255, 20, 147), #Deep Pink
+                    9: (210, 180, 140), #Tan
+                    10: (47, 79, 79), #Dark Slate Gray
+                    11: (220, 20, 60), #Crimson
+                    12: (255, 165, 0), #Orange
+                    13: (75, 0, 130), #Indigo
+                    14: (128, 128, 0), #Olive
+                    15: (0, 100, 0), #Dark Green
+                    16: (25, 25, 112), #Midnight Blue
                 },
 
                 "labels": {
