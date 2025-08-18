@@ -261,11 +261,8 @@ with st.container():
 
     st.write("\n")  
     st.write("**Need help using this tool?**")  
-
- 
-    st.write("\n")
     st.write("[Click here for more resources](https://www.youtube.com/watch?v=iNuvv0aS0iE)")
-    
+
     with st.sidebar:
        #first question + dropdown
         st.sidebar.markdown(
