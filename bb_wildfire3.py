@@ -252,15 +252,20 @@ with st.container():
 
     #explanation text 
     st.write(
-        'The goal of this tool is to make wildfire managment data layers more accessible and easier to use. The output is your selected data layer cropped to your region of interest. ' \
-        'Begin by selecting the data layers and data format you are interested in (if on a phone, click the arrows in the upper left). ' \
-        'Next, draw a boundary on the map by using the rectangle tool in the upper left corner of the map. ' \
-        'Lastly, scroll down and click the download button below the map. The app may need a moment to produce the output.' \
-        \
-        'Need help using this tool?' \
+    "The goal of this tool is to make wildfire management data layers more accessible and easier to use. "
+    "The output is your selected data layer cropped to your region of interest. "
+    "Begin by selecting the data layers and data format you are interested in (if on a phone, click the arrows in the upper left). "
+    "Next, draw a boundary on the map by using the rectangle tool in the upper left corner of the map. "
+    "Lastly, scroll down and click the download button below the map. The app may need a moment to produce the output."
     )
-    st.markdown("[Click here to watch a tutorial video](https://www.youtube.com/watch?v=iNuvv0aS0iE)")
 
+    st.write("\n")  
+    st.write("**Need help using this tool?**")  
+
+ 
+    st.write("\n")
+    st.write("[Click here for more resources](https://www.youtube.com/watch?v=iNuvv0aS0iE)")
+    
     with st.sidebar:
        #first question + dropdown
         st.sidebar.markdown(
