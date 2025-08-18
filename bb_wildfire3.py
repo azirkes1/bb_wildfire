@@ -259,9 +259,7 @@ with st.container():
     "Lastly, scroll down and click the download button below the map. The app may need a moment to produce the output."
     )
 
-    st.write("\n")  
-    st.write("**Need help using this tool?**")  
-    st.write("[Click here for more resources](https://www.youtube.com/watch?v=iNuvv0aS0iE)")
+    st.write("[Click here to watch a tutorial video](https://www.youtube.com/watch?v=iNuvv0aS0iE)")
 
     with st.sidebar:
        #first question + dropdown
