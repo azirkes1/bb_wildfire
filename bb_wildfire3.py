@@ -263,11 +263,9 @@ with st.container():
     # On mobile, Streamlit hides this sidebar by default and provides a hamburger menu (☰)
     # for the user to open it. This makes it "inherently safe for mobile."
     with st.sidebar:
-        st.header("Data Selection Options") # Added a header for clarity
-
-        st.sidebar.markdown("### Which data layers would you like to download?")
+        # Question + dropdown (no extra gap between)
         selected_options = st.sidebar.multiselect(
-            "",  # Leave label empty since markdown above is the "question"
+            "### Which data layers would you like to download?",
             list(recipe.keys()),
             key="data_layers_select"
         )
@@ -285,10 +283,12 @@ with st.container():
                 unsafe_allow_html=True
             )
 
-        # Larger question for file type
-        st.sidebar.markdown("### What format do you want the data in?")
+        # Add two blank lines between dropdown and next question
+        st.sidebar.markdown("<br><br>", unsafe_allow_html=True)
+
+        # Second question + dropdown
         selected_filetype = st.sidebar.multiselect(
-            "",
+            "### What format do you want the data in?",
             ['.tif', '.pdf'],
             key="file_format_select"
         )
@@ -296,8 +296,11 @@ with st.container():
         with st.sidebar.expander("About Data Types"):
             st.markdown(
                 """
-                <div style='color: #808080; overflow: hidden; white-space: normal; word-wrap: break-word; margin-bottom: 15px;'>
-                    PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
+                <div style='color: #808080; overflow: hidden; white-space: normal; 
+                word-wrap: break-word; margin-bottom: 15px;'>
+                    PDFs provide an easy and simple way to view the data, 
+                    whereas TIF files are ideal for both viewing and analyzing 
+                    data in ArcGIS or Google Earth.
                 </div>
                 """,
                 unsafe_allow_html=True
