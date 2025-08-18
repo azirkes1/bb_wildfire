@@ -121,81 +121,81 @@ with st.container():
             },
 
             "Wildfire Jurisdiction": {
-            "Title": "Wildfire Jurisdiction",
-            "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/jurisdic_rep6').select('b1'),
-            "colors": {
-                1: (8, 29, 88), #Deep Navy
-                2: (8, 64, 129), #Dark Blue  
-                3: (5, 112, 176), #Medium Blue
-                4: (54, 144, 192), #Light Blue
-                5: (102, 189, 223), #Sky Blue
-                6: (166, 217, 235), #Pale Blue
-                7: (217, 239, 255), #Very Light Blue
-                8: (255, 255, 191), #Light Yellow
-                9: (254, 224, 139), #Yellow
-                10: (253, 174, 97), #Light Orange
-                11: (244, 109, 67), #Orange
-                12: (215, 48, 39), #Red-Orange
-                13: (165, 42, 42), #Dark Red
-                14: (120, 30, 30), #Darker Red
-                15: (80, 20, 20), #Very Dark Red
-                16: (40, 10, 10), #Deepest Red
-            },
+                "Title": "Wildfire Jurisdiction",
+                "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/jurisdic_rep6').select('b1'),
+                "colors": {
+                    1: (8, 29, 88), #Deep Navy
+                    2: (8, 64, 129), #Dark Blue  
+                    3: (5, 112, 176), #Medium Blue
+                    4: (54, 144, 192), #Light Blue
+                    5: (102, 189, 223), #Sky Blue
+                    6: (166, 217, 235), #Pale Blue
+                    7: (217, 239, 255), #Very Light Blue
+                    8: (255, 255, 191), #Light Yellow
+                    9: (254, 224, 139), #Yellow
+                    10: (253, 174, 97), #Light Orange
+                    11: (244, 109, 67), #Orange
+                    12: (215, 48, 39), #Red-Orange
+                    13: (165, 42, 42), #Dark Red
+                    14: (120, 30, 30), #Darker Red
+                    15: (80, 20, 20), #Very Dark Red
+                    16: (40, 10, 10), #Deepest Red
+                },
 
-            "labels": {
-                1: 'USFWS', 
-                2: 'BLM', 
-                3: 'BIA', 
-                4: 'AK DNR',
-                5: 'NPS',
-                6: 'FAA',
-                7: 'AK DNR - Div. Parks',
-                8: 'ANCSA Village/AFS',
-                9: 'AK DOT',
-                10: 'ANCSA Regional/AFS',
-                11: 'Bourough/AKDNR',
-                12: 'Air Force', 
-                13: 'Army', 
-                14: 'USPS', 
-                15: 'AK Dept. Fish & Game', 
-                16: 'City/AK DNR'
-            },
+                "labels": {
+                    1: 'USFWS', 
+                    2: 'BLM', 
+                    3: 'BIA', 
+                    4: 'AK DNR',
+                    5: 'NPS',
+                    6: 'FAA',
+                    7: 'AK DNR - Div. Parks',
+                    8: 'ANCSA Village/AFS',
+                    9: 'AK DOT',
+                    10: 'ANCSA Regional/AFS',
+                    11: 'Bourough/AKDNR',
+                    12: 'Air Force', 
+                    13: 'Army', 
+                    14: 'USPS', 
+                    15: 'AK Dept. Fish & Game', 
+                    16: 'City/AK DNR'
+                },
 
-            "credits": "Data source: U.S. Department of the Interior, "
-            "Bureau of Land Management, Alaska Fire Service. "
-            "Alaska Wildland Fire Jurisdictions (AKWFJ). "
-            "Last modified March 3, 2023. ArcGIS Online. "
-            "https://www.arcgis.com/home/\n"
-            "item.html?id=1091963729c54\n"
-            "d3386b5e60995da6fff.\n", 
+                "credits": "Data source: U.S. Department of the Interior, "
+                "Bureau of Land Management, Alaska Fire Service. "
+                "Alaska Wildland Fire Jurisdictions (AKWFJ). "
+                "Last modified March 3, 2023. ArcGIS Online. "
+                "https://www.arcgis.com/home/\n"
+                "item.html?id=1091963729c54\n"
+                "d3386b5e60995da6fff.\n", 
 
-            "description": 
-            ("The Wildfire Jurisdiction dataset maps the boundaries of agencies responsible for "
-            "wildfire response in Alaska. It is produced by the Bureau of Land Management and the "
-            "Alaska Fire Service.")
-        },
-        "Flammability Hazard": {
-            "Title": "Flammability Hazard",
-            "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/haz_repro_rec').select('b1'),
-            "colors": {
-                0: (255, 255, 255), 1: (75, 101, 137), 2: (103, 166, 159), 3: (132, 196, 140), 
-                4: (250, 212, 131), 5: (253, 255, 193)
+                "description": 
+                ("The Wildfire Jurisdiction dataset maps the boundaries of agencies responsible for "
+                "wildfire response in Alaska. It is produced by the Bureau of Land Management and the "
+                "Alaska Fire Service.")
             },
-            "labels": {
-                0: "No data", 1: "Very Low", 2: "Low", 3: "Moderate",
-                4: "High", 5: "Extreme"
-            },
-            "credits": "Data Source: Schmidt, Jennifer. 2025. "
-                    "“Wildfire Exposure Assessment and Structure Risk.” "
-                    "Alaska Natural Resource Management. Accessed April 01, 2025. "
-                    "https://alaskanrm.com/wildfire-exposure/.", 
+            "Flammability Hazard": {
+                "Title": "Flammability Hazard",
+                "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/haz_repro_rec').select('b1'),
+                "colors": {
+                    0: (255, 255, 255), 1: (75, 101, 137), 2: (103, 166, 159), 3: (132, 196, 140), 
+                    4: (250, 212, 131), 5: (253, 255, 193)
+                },
+                "labels": {
+                    0: "No data", 1: "Very Low", 2: "Low", 3: "Moderate",
+                    4: "High", 5: "Extreme"
+                },
+                "credits": "Data Source: Schmidt, Jennifer. 2025. "
+                        "“Wildfire Exposure Assessment and Structure Risk.” "
+                        "Alaska Natural Resource Management. Accessed April 01, 2025. "
+                        "https://alaskanrm.com/wildfire-exposure/.", 
 
-            "description": 
-            ("This layer was produced by a team at the University of Alaska - Anchorage, led by Jen Schmidt. "
-            "The data highlights vegetation that has the potential to cause damage, loss, or harm to people, "
-            "infrastructure, equipment, natural resources, or property due to its flammability.")
-        }}
-    
+                "description": 
+                ("This layer was produced by a team at the University of Alaska - Anchorage, led by Jen Schmidt. "
+                "The data highlights vegetation that has the potential to cause damage, loss, or harm to people, "
+                "infrastructure, equipment, natural resources, or property due to its flammability.")
+            }}
+        
     # ---------------------------------------------------------
     #  CSS for Layout
     # ---------------------------------------------------------
