@@ -265,36 +265,40 @@ with st.container():
     with st.sidebar:
         st.header("Data Selection Options") # Added a header for clarity
 
-        selected_options = st.multiselect(
-            "Which data layers would you like to download?",
+        st.sidebar.markdown("### Which data layers would you like to download?")
+        selected_options = st.sidebar.multiselect(
+            "",  # Leave label empty since markdown above is the "question"
             list(recipe.keys()),
-            key="data_layers_select" # Single key for unified multiselect
+            key="data_layers_select"
         )
-        
-        with st.expander("About Data Sources"):
+
+        with st.sidebar.expander("About Data Sources"):
             st.markdown(
                 """
                 <div style='color: #808080; line-height: 1.5;'>
                     <b>Ownership:</b> Bureau of Land Management<br>
                     <b>Land Cover:</b> National Land Cover Database<br>
-                    <b>Wildfire Jurisdiction:</b>  Bureau of Land Management<br>
+                    <b>Wildfire Jurisdiction:</b> Bureau of Land Management<br>
                     <b>Flammability Hazard:</b> University of Alaska - Anchorage<br>
                 </div>
                 """,
                 unsafe_allow_html=True
             )
-                
-        selected_filetype = st.multiselect(
-            "What format do you want the data in?",
+
+        # Larger question for file type
+        st.sidebar.markdown("### What format do you want the data in?")
+        selected_filetype = st.sidebar.multiselect(
+            "",
             ['.tif', '.pdf'],
-            key="file_format_select" 
+            key="file_format_select"
         )
-        with st.expander("About Data Types"):
+
+        with st.sidebar.expander("About Data Types"):
             st.markdown(
                 """
                 <div style='color: #808080; overflow: hidden; white-space: normal; word-wrap: break-word; margin-bottom: 15px;'>
-                PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
-            </div>
+                    PDFs provide an easy and simple way to view the data, whereas TIF files are ideal for both viewing and analyzing data in ArcGIS or Google Earth.
+                </div>
                 """,
                 unsafe_allow_html=True
             )
