@@ -255,11 +255,11 @@ with st.container():
         'The goal of this tool is to make wildfire managment data layers more accessible and easier to use. The output is your selected data layer cropped to your region of interest. ' \
         'Begin by selecting the data layers and data format you are interested in (if on a phone, click the arrows in the upper left). ' \
         'Next, draw a boundary on the map by clicking on the rectangle tool in the upper left corner of the map. ' \
-        'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.'
-        'Need help using this tool?'
-        st.markdown("[Click here to watch a tutorial video](https://www.youtube.com/watch?v=iNuvv0aS0iE)")
+        'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.' \
+        'Need help using this tool?' \
     )
-
+    st.markdown("[Click here to watch a tutorial video](https://www.youtube.com/watch?v=iNuvv0aS0iE)")
+    
     with st.sidebar:
        #first question + dropdown
         st.sidebar.markdown(
