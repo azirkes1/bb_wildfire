@@ -256,6 +256,8 @@ with st.container():
         'Begin by selecting the data layers and data format you are interested in (if on a phone, click the arrows in the upper left). ' \
         'Next, draw a boundary on the map by clicking on the rectangle tool in the upper left corner of the map. ' \
         'Lastly, scroll down and click the download button that appears below the map. The app may need a moment to produce the output.'
+        'Need help using this tool?'
+        st.markdown("[Click here to watch a tutorial video](https://www.youtube.com/watch?v=iNuvv0aS0iE)")
     )
 
     with st.sidebar:
@@ -309,8 +311,6 @@ with st.container():
                 """,
                 unsafe_allow_html=True
             )
-        st.write("Need help using this tool?")
-        st.markdown("[Click here to watch a tutorial video](https://www.youtube.com/watch?v=iNuvv0aS0iE)")
 
     if 'selected_options' not in st.session_state:
         st.session_state.selected_options = []
