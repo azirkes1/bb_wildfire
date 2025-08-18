@@ -124,22 +124,22 @@ with st.container():
             "Title": "Wildfire Jurisdiction",
             "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/jurisdic_rep6').select('b1'),
             "colors": {
-                1: (165, 0, 38), #USFWS
-                2: (215, 48, 39), #BLM
-                3: (244, 109, 67), #BIA
-                4: (253, 174, 97), #AK DNR
-                5: (254, 224, 139), #NPS
-                6: (255, 255, 191), #FAA
-                7: (217, 239, 139), #AK DNR - Div. Parks
-                8: (166, 217, 106), #ANCSA Village/AFS
-                9: (102, 189, 99), #AK DOT
-                10: (26, 152, 80), #ANCSA Regional/AFS
-                11: (0, 104, 55), #Bourough/AKDNR
-                12: (54, 144, 192), #Air Force
-                13: (5, 112, 176), #Army
-                14: (8, 64, 129), #uSPS
-                15: (8, 29, 88), #AK Dept. Fish & Game
-                16: (37, 52, 148) #City/AK DNR
+                1: (8, 29, 88), #Deep Navy
+                2: (8, 64, 129), #Dark Blue  
+                3: (5, 112, 176), #Medium Blue
+                4: (54, 144, 192), #Light Blue
+                5: (102, 189, 223), #Sky Blue
+                6: (166, 217, 235), #Pale Blue
+                7: (217, 239, 255), #Very Light Blue
+                8: (255, 255, 191), #Light Yellow
+                9: (254, 224, 139), #Yellow
+                10: (253, 174, 97), #Light Orange
+                11: (244, 109, 67), #Orange
+                12: (215, 48, 39), #Red-Orange
+                13: (165, 42, 42), #Dark Red
+                14: (120, 30, 30), #Darker Red
+                15: (80, 20, 20), #Very Dark Red
+                16: (40, 10, 10), #Deepest Red
             },
 
             "labels": {
