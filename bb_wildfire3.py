@@ -91,27 +91,26 @@ with st.container():
             },
 
             "Land Cover": {
-                "Title": "NLCD Land Cover",
-                "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/landc_repro').select('b1'),
+                "Title": "National Land Cover Database",
+                "ee_image": 'projects/ee-azirkes1/assets/AK_proj/GEE_NLCD',
                 "colors": {
-                    0: (255, 255, 255), 1: (255, 255, 255),  2: (0, 0, 255), 3: (159, 161, 240), 
-                    4: (253, 204, 211), 5: (255, 122, 143), 6: (1, 1, 1),       
-                    7: (191, 191, 191), 8: (230, 232, 250), 9: (122, 127, 117), 
-                    10: (204, 255, 153), 11: (154, 217, 108), 12: (84, 161, 53), 
-                    13: (243, 213, 181), 14: (204, 147, 104),15: (191, 102, 75), 
-                    16: (255, 221, 0), 17: (255, 185, 87), 18: (255, 146, 56), 
+                    0: (255, 255, 255), 11: (82, 117, 168),  12: (217, 232, 255), 21: (232, 209, 209), 
+                    22: (223, 158, 133), 23: (248, 0, 0), 24: (181, 0, 0),       
+                    31: (184, 184, 171), 41: (108, 179, 107), 42: (31, 107, 57), 
+                    43: (194, 210, 156), 51: (172, 146, 57), 52: (210, 194, 133), 
+                    71: (235, 235, 204), 72: (209, 209, 130), 74: (130, 184, 158), 
+                    90: (194, 223, 235), 95: (121, 171, 194), 
                 },
                 "labels": {
-                    0: 'No Data', 1:  'NoData', 2: 'Water', 3: 'Snow/Ice', 4: 'Developed - Open Space', 5: 'Developed',
-                    6: 'Roads', 7: 'Barren', 8: 'Quarries/Mines', 9: 'Sparse Vegetation', 10: 'Tree Cover = 10% - 24%',
-                    11: 'Tree Cover = 25% - 49%', 12: 'Tree Cover = 50% - 85%', 13: 'Shrub Cover = 10% - 24%',
-                    14: 'Shrub Cover = 25% - 49%', 15: 'Shrub Cover = 50% - 65%', 16: 'Herb Cover = 10% - 24%', 
-                    17: 'Herb Cover = 25% - 49%', 18: 'Herb Cover = 50% - 75%'
+                    0: 'No Data', 11:  'Open Water', 12: 'Perennial Ice/Snow', 21: 'Developed, Open Space', 22: 'Developed Low Intensity', 23: 'Developed, Medium Intensity',
+                    24: 'Developed, High Intensity', 31: 'Barren Land', 41: 'Deciduous Forest', 42: 'Evergreen Forest', 43: 'Mixed Forest',
+                    51: 'Dwarf Shrub', 52: 'Shrub/Scrub', 71: 'Grassland/Herbaceous',
+                    72: 'Sedge/Herbaceous', 74: 'Moss', 90: 'Woody Wetland', 
+                    95: 'Emergent Herbaceous Wetland'
                     },
-                "credits": "Data source: Dewitz, J. 2021. National Land Cover Database (NLCD) 2019" 
-                "Land Cover Science Product (ver. 2.0, June 2021)." 
-                "U.S. Geological Survey data release. https://doi.org/10.5066/P9KZCM54",
-
+                "credits": "National Land Cover Database (NLCD) 2016 – Alaska. "
+                "U.S. Geological Survey, 2016. https://doi.org/10.5066/P96HHBIE.",
+        
                 "description": 
                 ("The National Land Cover Database (NLCD), which is created by the U.S. Geological Survey, "
                 "provides comprehensive land cover information for the United States. "
