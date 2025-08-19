@@ -108,7 +108,7 @@ with st.container():
                     72: 'Sedge/Herbaceous', 74: 'Moss', 90: 'Woody Wetland', 
                     95: 'Emergent Herbaceous Wetland'
                     },
-                "credits": "National Land Cover Database (NLCD) 2016 – Alaska. "
+                "credits": "National Land Cover Database (NLCD) 2016 Alaska. "
                 "U.S. Geological Survey, 2016. https://doi.org/10.5066/P96HHBIE.",
         
                 "description": 
