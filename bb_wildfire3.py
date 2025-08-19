@@ -92,7 +92,7 @@ with st.container():
 
             "Land Cover": {
                 "Title": "National Land Cover Database",
-                "ee_image": "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/GEE_NLCD'),
+                "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/GEE_NLCD'),
                 "colors": {
                     0: (255, 255, 255), 11: (82, 117, 168),  12: (217, 232, 255), 21: (232, 209, 209), 
                     22: (223, 158, 133), 23: (248, 0, 0), 24: (181, 0, 0),       
