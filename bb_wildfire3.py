@@ -91,7 +91,7 @@ with st.container():
             },
 
             "Land Cover": {
-                "Title": "LANDFIRE Land Cover",
+                "Title": "NLCD Land Cover",
                 "ee_image": ee.Image('projects/ee-azirkes1/assets/AK_proj/landc_repro').select('b1'),
                 "colors": {
                     0: (255, 255, 255), 1: (255, 255, 255),  2: (0, 0, 255), 3: (159, 161, 240), 
@@ -108,9 +108,9 @@ with st.container():
                     14: 'Shrub Cover = 25% - 49%', 15: 'Shrub Cover = 50% - 65%', 16: 'Herb Cover = 10% - 24%', 
                     17: 'Herb Cover = 25% - 49%', 18: 'Herb Cover = 50% - 75%'
                     },
-                "credits": "Data source: LANDFIRE, 2024, Existing Vegetation Cover Layer, "
-                "LANDFIRE 2.0.0, U.S. Department of the Interior, Geological Survey, "
-                "and U.S. Department of Agriculture. Accessed 01 April 2025 at http://www.landfire/viewer.", 
+                "credits": "Data source: Dewitz, J. 2021. National Land Cover Database (NLCD) 2019" 
+                "Land Cover Science Product (ver. 2.0, June 2021)." 
+                "U.S. Geological Survey data release. https://doi.org/10.5066/P9KZCM54",
 
                 "description": 
                 ("The National Land Cover Database (NLCD), which is created by the U.S. Geological Survey, "
